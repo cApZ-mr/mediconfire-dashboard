@@ -1,6 +1,6 @@
 {
   "rewrites": [
-    { "source": "/auth/:path*", "destination": "https://api.mediconfire.de/auth/:path*" },
-    { "source": "/api/:path*", "destination": "https://api.mediconfire.de/api/:path*" }
+    { "source": "/auth/:path*", "destination": "https://2-28-117-175.sslip.io/auth/:path*" },
+    { "source": "/api/:path*", "destination": "https://2-28-117-175.sslip.io/api/:path*" }
   ]
 }
