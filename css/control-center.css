@@ -1,0 +1,852 @@
+/* =========================================================
+   CONTROL CENTER
+   ========================================================= */
+
+.control-center {
+    margin-top: 2rem;
+}
+
+.control-center-header {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    margin-bottom: 1rem;
+}
+
+.control-center-header h2 {
+    margin: .15rem 0 0;
+    font-size: 1.35rem;
+}
+
+.control-center-eyebrow {
+    color: var(--muted);
+    font-size: .68rem;
+    font-weight: 800;
+    letter-spacing: .14em;
+}
+
+.control-center-hint {
+    color: #555;
+    font-size: .78rem;
+}
+
+
+/* =========================================================
+   MAP (Fläche mit den 8 Armen)
+   ========================================================= */
+
+.control-center-map {
+    position: relative;
+    min-height: 660px;
+    overflow: hidden;
+
+    border: 1px solid var(--line);
+    border-radius: 24px;
+
+    background:
+        radial-gradient(
+            circle at 50% 50%,
+            rgba(255,106,0,.055),
+            transparent 25%
+        ),
+        #080808;
+}
+
+
+/* dezentes Raster */
+
+.control-center-map::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+
+    background-image:
+        linear-gradient(rgba(255,255,255,.018) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,.018) 1px, transparent 1px);
+
+    background-size: 40px 40px;
+
+    mask-image: radial-gradient(
+        circle at center,
+        black,
+        transparent 80%
+    );
+
+    pointer-events: none;
+}
+
+
+/* =========================================================
+   VERBINDUNGSLINIEN
+   ========================================================= */
+
+.control-center-lines {
+    position: absolute;
+    inset: 0;
+
+    width: 100%;
+    height: 100%;
+
+    pointer-events: none;
+}
+
+.control-center-lines line {
+    stroke: #252525;
+    stroke-width: 1.2;
+    stroke-dasharray: 4 8;
+
+    transition:
+        stroke .3s ease,
+        stroke-width .3s ease;
+}
+
+
+/* =========================================================
+   CORE
+   ========================================================= */
+
+.control-center-core {
+    position: absolute;
+
+    left: 50%;
+    top: 50%;
+
+    width: 170px;
+    height: 170px;
+
+    transform: translate(-50%, -50%);
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+
+    z-index: 5;
+
+    border: 1px solid #292929;
+    border-radius: 50%;
+
+    background:
+        radial-gradient(
+            circle,
+            #161616 0%,
+            #0a0a0a 65%
+        );
+
+    box-shadow:
+        0 0 0 12px rgba(255,255,255,.012),
+        0 0 60px rgba(255,106,0,.08);
+
+    text-align: center;
+
+    cursor: pointer;
+
+    transition:
+        border-color .3s ease,
+        box-shadow .3s ease,
+        transform .2s ease;
+}
+
+.control-center-core:hover,
+.control-center-core:focus-visible {
+    border-color: rgba(255,106,0,.55);
+    outline: none;
+}
+
+.control-center-core:active {
+    transform: translate(-50%, -50%) scale(.96);
+}
+
+.core-icon {
+    font-size: 2rem;
+    line-height: 1;
+    margin-bottom: .55rem;
+
+    filter:
+        grayscale(.1)
+        drop-shadow(0 0 12px rgba(255,106,0,.25));
+}
+
+.control-center-core strong {
+    font-size: .95rem;
+    font-weight: 800;
+}
+
+.control-center-core span {
+    display: flex;
+    align-items: center;
+    gap: .4rem;
+
+    margin-top: .3rem;
+
+    color: var(--muted);
+    font-size: .7rem;
+}
+
+.control-center-core span i {
+    width: 6px;
+    height: 6px;
+
+    border-radius: 50%;
+
+    background: #3ddc84;
+
+    box-shadow:
+        0 0 0 3px rgba(61,220,132,.1);
+
+    transition:
+        background .3s ease,
+        box-shadow .3s ease;
+}
+
+.core-status-text {
+    font-style: normal;
+}
+
+
+/* =========================================================
+   ORBITS
+   ========================================================= */
+
+.core-orbit {
+    position: absolute;
+
+    border: 1px solid rgba(255,106,0,.12);
+    border-radius: 50%;
+
+    pointer-events: none;
+}
+
+.orbit-one {
+    width: 205px;
+    height: 205px;
+
+    animation: orbitPulse 4s ease-in-out infinite;
+}
+
+.orbit-two {
+    width: 235px;
+    height: 235px;
+
+    border-color: rgba(255,255,255,.035);
+
+    animation: orbitPulse 5s ease-in-out infinite reverse;
+}
+
+@keyframes orbitPulse {
+    0%, 100% {
+        opacity: .4;
+        transform: scale(1);
+    }
+
+    50% {
+        opacity: .8;
+        transform: scale(1.025);
+    }
+}
+
+
+/* =========================================================
+   CORE REFRESH ANIMATION
+   ========================================================= */
+
+/* rotierender Ring */
+
+.control-center-core::after {
+    content: "";
+    position: absolute;
+    inset: -7px;
+
+    border: 2px solid transparent;
+    border-top-color: var(--accent);
+    border-right-color: rgba(255,106,0,.25);
+    border-radius: 50%;
+
+    opacity: 0;
+    pointer-events: none;
+
+    transition: opacity .25s ease;
+}
+
+.is-refreshing .control-center-core::after {
+    opacity: 1;
+    animation: coreSpin .9s linear infinite;
+}
+
+.is-refreshing .orbit-one { animation-duration: 1s; }
+.is-refreshing .orbit-two { animation-duration: 1.3s; }
+
+/* Core lädt sich auf, je mehr Bereiche in ihm stecken (--charge 0..1, per JS) */
+
+.is-refreshing .control-center-core {
+    transform-origin: 0 0;
+
+    scale: calc(1 + var(--charge, 0) * .12);
+
+    border-color: rgba(255,106,0, calc(.25 + var(--charge, 0) * .75));
+
+    box-shadow:
+        0 0 0 12px rgba(255,255,255,.012),
+        0 0 calc(80px + var(--charge, 0) * 90px)
+            rgba(255,106,0, calc(.25 + var(--charge, 0) * .45));
+}
+
+.is-refreshing .control-center-core:active {
+    transform: translate(-50%, -50%);
+}
+
+/* Bereiche verschwinden hinter dem Core, wenn sie eingezogen werden.
+   transform-origin 0 0 = visueller Mittelpunkt (wegen translate(-50%,-50%)) */
+
+.is-refreshing .control-center-node {
+    z-index: 3;
+    pointer-events: none;
+    transform-origin: 0 0;
+}
+
+/* Linien-Striche fließen beim Ausfahren nach außen */
+
+.is-refreshing .control-center-lines line {
+    animation-direction: reverse;
+}
+
+/* leuchtende Spitze vorne an den ausfahrenden Linien */
+
+.line-head {
+    position: absolute;
+
+    left: 50%;
+    top: 50%;
+
+    width: 8px;
+    height: 8px;
+
+    transform: translate(-50%, -50%);
+
+    border-radius: 50%;
+
+    background: #ffb067;
+
+    box-shadow:
+        0 0 0 3px rgba(255,106,0,.18),
+        0 0 14px 3px rgba(255,106,0,.8);
+
+    opacity: 0;
+    pointer-events: none;
+
+    z-index: 4;
+}
+
+/* Shockwave-Ringe, wenn der Core zündet */
+
+.core-shockwave {
+    position: absolute;
+
+    left: 50%;
+    top: 50%;
+
+    transform: translate(-50%, -50%);
+
+    border: 2px solid rgba(255,106,0,.85);
+    border-radius: 50%;
+
+    opacity: 0;
+    pointer-events: none;
+
+    z-index: 4;
+}
+
+.is-refreshing .control-center-core span i {
+    background: var(--accent);
+    box-shadow: 0 0 0 3px rgba(255,106,0,.15);
+}
+
+/* Linien laufen zur Mitte */
+
+.is-refreshing .control-center-lines line {
+    stroke: rgba(255,106,0,.7);
+    animation: lineFlow .6s linear infinite;
+}
+
+/* Nodes blinken leicht versetzt */
+
+.is-refreshing .node-status {
+    animation: statusBlink .6s ease-in-out infinite;
+}
+
+.is-refreshing .node-slot-2  .node-status { animation-delay: .05s; }
+.is-refreshing .node-slot-3  .node-status { animation-delay: .1s; }
+.is-refreshing .node-slot-4  .node-status { animation-delay: .15s; }
+.is-refreshing .node-slot-5  .node-status { animation-delay: .2s; }
+.is-refreshing .node-slot-6  .node-status { animation-delay: .25s; }
+.is-refreshing .node-slot-7  .node-status { animation-delay: .3s; }
+.is-refreshing .node-slot-8  .node-status { animation-delay: .35s; }
+.is-refreshing .node-slot-9  .node-status { animation-delay: .4s; }
+.is-refreshing .node-slot-10 .node-status { animation-delay: .45s; }
+.is-refreshing .node-slot-11 .node-status { animation-delay: .5s; }
+
+/* fertig: kurzer grüner Flash */
+
+.is-done .control-center-core {
+    border-color: rgba(61,220,132,.7);
+    box-shadow:
+        0 0 0 12px rgba(61,220,132,.04),
+        0 0 70px rgba(61,220,132,.25);
+}
+
+.is-done .control-center-lines line {
+    stroke: rgba(61,220,132,.45);
+}
+
+@keyframes coreSpin {
+    to { transform: rotate(360deg); }
+}
+
+@keyframes lineFlow {
+    to { stroke-dashoffset: 12; }
+}
+
+@keyframes statusBlink {
+    0%, 100% { opacity: .3; }
+    50%      { opacity: 1; }
+}
+
+
+/* =========================================================
+   UPDATE-PULS: grüner Impuls läuft vom Core zu jedem Punkt,
+   der Punkt leuchtet beim Ankommen kurz grün auf
+   ========================================================= */
+
+.control-center-lines .pulse-line {
+    stroke: #3ddc84;
+    stroke-width: 2.4;
+    stroke-dasharray: .14 1;
+    stroke-dashoffset: .14;
+    stroke-linecap: round;
+
+    opacity: 0;
+
+    filter: drop-shadow(0 0 4px rgba(61,220,132,.8));
+}
+
+.is-refreshing .control-center-lines .pulse-line {
+    animation: none;
+}
+
+.is-done .control-center-lines .pulse-line {
+    stroke: #3ddc84;
+
+    animation: linePulse .7s ease-out both;
+    animation-delay: calc(var(--i) * .07s);
+}
+
+@keyframes linePulse {
+    0%   { opacity: 1; stroke-dashoffset: .14; }
+    85%  { opacity: 1; }
+    100% { opacity: 0; stroke-dashoffset: -1; }
+}
+
+
+
+/* =========================================================
+   NODES (11 Arme, im Uhrzeigersinn ab 12 Uhr positioniert)
+   ========================================================= */
+
+.control-center-node {
+    position: absolute;
+
+    z-index: 10;
+
+    width: 168px;
+
+    display: flex;
+    align-items: center;
+
+    gap: .75rem;
+
+    padding: .8rem .95rem;
+
+    border: 1px solid #292929;
+    border-radius: 14px;
+
+    background: rgba(13,13,13,.9);
+
+    color: #fff;
+
+    text-align: left;
+
+    cursor: pointer;
+
+    transform: translate(-50%, -50%);
+
+    transition:
+        border-color .25s ease,
+        background .25s ease,
+        transform .25s ease,
+        box-shadow .25s ease;
+}
+
+.control-center-node:hover,
+.control-center-node:focus-visible {
+    border-color: rgba(255,106,0,.65);
+
+    background: #111;
+
+    transform: translate(-50%, -50%) scale(1.035);
+
+    box-shadow:
+        0 0 0 1px rgba(255,106,0,.08),
+        0 12px 35px rgba(0,0,0,.35);
+
+    outline: none;
+}
+
+.control-center-node:hover .node-icon {
+    color: var(--accent);
+    border-color: rgba(255,106,0,.4);
+}
+
+/* Admin-Aktionen (Timeout/Kick/Ban/Delete): dezent rot statt orange,
+   damit sie sich optisch von den normalen Bereichen abheben */
+
+.node-danger .node-icon {
+    color: #ff6b6b;
+    border-color: rgba(255,107,107,.3);
+}
+
+.node-danger:hover,
+.node-danger:focus-visible {
+    border-color: rgba(255,107,107,.65);
+
+    box-shadow:
+        0 0 0 1px rgba(255,107,107,.08),
+        0 12px 35px rgba(0,0,0,.35);
+}
+
+.node-danger:hover .node-icon {
+    color: #ff6b6b;
+    border-color: rgba(255,107,107,.5);
+}
+
+/* Positionen: 11 Arme gleichmaessig auf einer Ellipse verteilt (32,7 Grad
+   Abstand), im Uhrzeigersinn ab 12 Uhr. Reihenfolge entspricht den
+   areas-Eintraegen in control-center.js. */
+
+.node-slot-1  { left: 50%;   top: 15%;   }
+.node-slot-2  { left: 70.5%; top: 20.6%; }
+.node-slot-3  { left: 84.6%; top: 35.5%; }
+.node-slot-4  { left: 87.6%; top: 55%;   }
+.node-slot-5  { left: 78.7%; top: 72.9%; }
+.node-slot-6  { left: 60.7%; top: 83.6%; }
+.node-slot-7  { left: 39.3%; top: 83.6%; }
+.node-slot-8  { left: 21.3%; top: 72.9%; }
+.node-slot-9  { left: 12.4%; top: 55%;   }
+.node-slot-10 { left: 15.4%; top: 35.5%; }
+.node-slot-11 { left: 29.5%; top: 20.6%; }
+
+
+.node-icon {
+    width: 34px;
+    height: 34px;
+
+    flex: none;
+
+    display: grid;
+    place-items: center;
+
+    border: 1px solid #292929;
+    border-radius: 10px;
+
+    color: #aaa;
+
+    font-size: 1rem;
+
+    transition:
+        color .25s ease,
+        border-color .25s ease;
+}
+
+.node-content {
+    display: flex;
+    flex-direction: column;
+
+    min-width: 0;
+}
+
+.node-content strong {
+    font-size: .82rem;
+    font-weight: 700;
+}
+
+.node-content small {
+    margin-top: .15rem;
+
+    color: var(--muted);
+
+    font-size: .68rem;
+}
+
+.node-status {
+    width: 6px;
+    height: 6px;
+
+    margin-left: auto;
+
+    flex: none;
+
+    border-radius: 50%;
+
+    background: var(--accent);
+
+    opacity: .65;
+}
+
+.node-status.online {
+    background: #3ddc84;
+
+    box-shadow:
+        0 0 0 3px rgba(61,220,132,.08);
+}
+
+
+/* =========================================================
+   DETAIL PANEL
+   ========================================================= */
+
+.control-center-detail {
+    position: absolute;
+
+    left: 50%;
+    bottom: 28px;
+
+    z-index: 20;
+
+    width: min(360px, calc(100% - 40px));
+
+    padding: 1rem 1.1rem;
+
+    border: 1px solid #292929;
+    border-radius: 14px;
+
+    background: rgba(13,13,13,.96);
+
+    transform:
+        translate(-50%, 20px);
+
+    opacity: 0;
+    pointer-events: none;
+
+    transition:
+        opacity .25s ease,
+        transform .25s ease;
+}
+
+.control-center-detail.active {
+    opacity: 1;
+
+    transform:
+        translate(-50%, 0);
+
+    pointer-events: auto;
+}
+
+.detail-close {
+    position: absolute;
+
+    top: 8px;
+    right: 10px;
+
+    border: 0;
+    background: transparent;
+
+    color: #666;
+
+    font-size: 1.3rem;
+
+    cursor: pointer;
+}
+
+.detail-close:hover {
+    color: #fff;
+}
+
+.detail-label {
+    color: var(--accent);
+
+    font-size: .62rem;
+    font-weight: 800;
+
+    letter-spacing: .14em;
+}
+
+.control-center-detail h3 {
+    margin: .25rem 0 .2rem;
+
+    font-size: 1.05rem;
+}
+
+.control-center-detail p {
+    margin: 0;
+
+    color: var(--muted);
+
+    font-size: .78rem;
+    line-height: 1.5;
+}
+
+.detail-value {
+    margin-top: .7rem;
+
+    color: #ddd;
+
+    font-size: .75rem;
+    font-weight: 700;
+}
+
+.detail-action {
+    display: inline-flex;
+    align-items: center;
+    gap: .5rem;
+
+    margin-top: .7rem;
+
+    color: var(--accent);
+
+    font-size: .75rem;
+    font-weight: 700;
+
+    text-decoration: none;
+}
+
+.detail-action span {
+    transition: transform .2s ease;
+}
+
+.detail-action:hover span {
+    transform: translateX(4px);
+}
+
+
+/* =========================================================
+   RESPONSIVE
+   ========================================================= */
+
+@media (max-width: 768px) {
+
+    .control-center-map {
+        min-height: 760px;
+    }
+
+    .control-center-node {
+        width: 132px;
+        padding: .6rem .7rem;
+        gap: .5rem;
+    }
+
+    .control-center-core {
+        width: 135px;
+        height: 135px;
+    }
+
+    .control-center-lines {
+        opacity: .5;
+    }
+}
+
+
+@media (max-width: 560px) {
+
+    .control-center-header {
+        align-items: flex-start;
+        flex-direction: column;
+        gap: .4rem;
+    }
+
+    .control-center-map {
+        min-height: 720px;
+    }
+
+    .control-center-node {
+        width: 104px;
+        padding: .5rem .55rem;
+        gap: .4rem;
+    }
+
+    .node-content strong {
+        font-size: .66rem;
+    }
+
+    .node-content small {
+        font-size: .58rem;
+    }
+
+    .node-icon {
+        width: 24px;
+        height: 24px;
+        font-size: .82rem;
+    }
+
+    .control-center-core {
+        width: 104px;
+        height: 104px;
+    }
+
+    .orbit-one {
+        width: 130px;
+        height: 130px;
+    }
+
+    .orbit-two {
+        width: 150px;
+        height: 150px;
+    }
+}
+
+/* Sehr schmale Displays: nochmal enger, damit sich die 11 Arme nicht
+   gegenseitig ueberlappen */
+
+@media (max-width: 400px) {
+
+    .control-center-map {
+        min-height: 680px;
+    }
+
+    .control-center-node {
+        width: 92px;
+        padding: .45rem .5rem;
+    }
+
+    .node-content strong {
+        font-size: .62rem;
+    }
+
+    .node-content small {
+        display: none;
+    }
+
+    .control-center-core {
+        width: 92px;
+        height: 92px;
+    }
+
+    .control-center-core strong {
+        font-size: .78rem;
+    }
+}
+
+
+@media (prefers-reduced-motion: reduce) {
+
+    .core-orbit,
+    .is-refreshing .control-center-core::after,
+    .is-refreshing .control-center-lines line,
+    .is-refreshing .node-status,
+    .is-done .control-center-lines .pulse-line {
+        animation: none;
+    }
+
+    .control-center-node,
+    .control-center-detail {
+        transition: none;
+    }
+}
