@@ -17,26 +17,31 @@ $('#days').innerHTML = DAYS.map((d, i) => `
     </div>
   </div>`).join('');
 
-function updateStreamplan() {
-  $$('.day').forEach(r => $$('input.form-control', r).forEach(i => i.disabled = !$('input[type=checkbox]', r).checked));
-  const [ci, cc] = [$('#ptitle').value, $('#pfoot').value];
-  $('#preview').textContent = `${ci ? '**' + ci + '**\n\n' : ''}` + $$('.day').map((r, i) => {
+function planLines() {
+  return $$('.day').map((r, i) => {
     const on = $('input[type=checkbox]', r).checked, [t, ti] = $$('input.form-control', r).map(x => x.value);
     return on ? `${DAYS[i]}: ${t} Uhr – ${ti || 'Stream'}` : `${DAYS[i]}: Pause`;
-  }).join('\n') + (cc ? '\n\n' + '-# ' + cc : '');
+  }).join('\n');
+}
+
+function updateStreamplan() {
+  $$('.day').forEach(r => $$('input.form-control', r).forEach(i => i.disabled = !$('input[type=checkbox]', r).checked));
+  $('#pv_title').textContent = $('#ptitle').value;
+  $('#pv_lines').textContent = planLines();
+  $('#pv_foot').textContent = $('#pfoot').value;
 }
 
 const form = $('#planForm');
 form.addEventListener('input', updateStreamplan);
 updateStreamplan();
 
-/* Anbindung an den Bot: Vorschau-Text wird genau so in Discord gepostet */
+/* Anbindung an den Bot: Vorschau wird genau so als Embed gepostet */
 function restore(saved) {
   if (saved.form) {
     $$('input[type=checkbox]', form).forEach(c => { c.checked = false; }); // FormData enthält nur angehakte
     Object.entries(saved.form).forEach(([k, v]) => {
       const el = form.elements[k];
-      if (!el || k === 'channel') return;
+      if (!el) return;
       if (el.type === 'checkbox') el.checked = true;
       else el.value = v;
     });
@@ -50,9 +55,7 @@ function restore(saved) {
 
 (async () => {
   try {
-    const saved = await apiFetch('/api/streamplan');
-    await fillChannels($('#channel'), saved.channel_id);
-    restore(saved);
+    restore(await apiFetch('/api/streamplan'));
   } catch (e) { toast(esc(e.message)); }
 })();
 
@@ -62,8 +65,9 @@ form.addEventListener('submit', async e => {
   btn.disabled = true;
   try {
     const saved = await apiFetch('/api/streamplan', 'POST', {
-      channel_id: $('#channel').value,
-      content: $('#preview').textContent,
+      title: $('#ptitle').value,
+      lines: planLines(),
+      footer: $('#pfoot').value,
       replace: $('#replace').checked,
       form: Object.fromEntries(new FormData(form)),
     });

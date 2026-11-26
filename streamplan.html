@@ -15,7 +15,7 @@
     <div id="app-header"></div>
     <main class="container py-5">
         <h1 class="page-title">Streamplan</h1>
-        <p class="text-secondary mb-4">Schalte Tage ein, trage Zeit und Titel ein und sende den Plan an deinen Kanal.</p>
+        <p class="text-secondary mb-4">Schalte Tage ein, trage Zeit und Titel ein und sende den Plan als Embed in den Streamplan-Kanal.</p>
         <form id="planForm">
             <div class="row g-4">
                 <div class="col-lg-7">
@@ -25,12 +25,6 @@
                 </div>
                 <div class="col-lg-5">
                     <div class="card p-4 mb-3">
-                        <div class="mb-3">
-                            <label class="form-label" for="channel">Kanal</label>
-                            <select class="form-select" id="channel" name="channel" required>
-                                <option value="">Lädt …</option>
-                            </select>
-                        </div>
                         <div class="mb-3">
                             <label class="form-label" for="ptitle">Überschrift</label>
                             <input class="form-control" id="ptitle" name="ptitle" value="Streamplan diese Woche">
@@ -48,7 +42,14 @@
                     </div>
                     <div class="card p-4">
                         <h6 class="mb-3">Vorschau</h6>
-                        <div class="preview"><pre id="preview"></pre></div>
+                        <div class="preview">
+                            <div><strong class="text-white">MedicOnFire</strong> <small class="text-secondary">heute</small></div>
+                            <div class="embed" style="border-left-color:#e67e22">
+                                <h6 id="pv_title"></h6>
+                                <div id="pv_lines" style="white-space:pre-line"></div>
+                                <div id="pv_foot" class="small text-secondary mt-2"></div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
