@@ -20,12 +20,16 @@ $('#days').innerHTML = DAYS.map((d, i) => `
 function planLines() {
   return $$('.day').map((r, i) => {
     const on = $('input[type=checkbox]', r).checked, [t, ti] = $$('input.form-control', r).map(x => x.value);
-    return on ? `${DAYS[i]}: ${t} Uhr – ${ti || 'Stream'}` : `${DAYS[i]}: Pause`;
+    return on ? `${DAYS[i]}: ${t ? t + ' Uhr – ' : ''}${ti || 'Stream'}` : `${DAYS[i]}: Pause`;
   }).join('\n');
 }
 
 function updateStreamplan() {
-  $$('.day').forEach(r => $$('input.form-control', r).forEach(i => i.disabled = !$('input[type=checkbox]', r).checked));
+  $$('.day').forEach(r => {
+    const on = $('input[type=checkbox]', r).checked;
+    $$('input.form-control', r).forEach(i => i.disabled = !on);
+    $('input[type=time]', r).required = on; // Browser meldet halb ausgefüllte Uhrzeit (--:30) statt leer zu senden
+  });
   $('#pv_title').textContent = $('#ptitle').value;
   $('#pv_lines').textContent = planLines();
   $('#pv_foot').textContent = $('#pfoot').value;
