@@ -420,11 +420,21 @@ document.addEventListener("DOMContentLoaded", () => {
     if (!map.classList.contains("is-refreshing")) coreText.textContent = onlineText;
     setText("botState", o.bot_online ? "Bot online" : "Bot offline");
     document.getElementById("botDot")?.classList.toggle("online", o.bot_online);
+    document.getElementById("botDot")?.classList.toggle("offline", !o.bot_online);
+    document.getElementById("botPill")?.classList.toggle("is-online", o.bot_online);
+    document.getElementById("botPill")?.classList.toggle("is-offline", !o.bot_online);
 
     setText("statStream", stream || "Kein Plan");
-    setText("statGuilds", o.guilds ?? "–");
-    setText("statTodos", o.open_todos);
-    setText("statJoin", o.join_roles);
+    const count = (id, n) => { const el = document.getElementById(id); if (el) countTo(el, n); };
+    count("statGuilds", o.guilds);
+    count("statTodos", o.open_todos);
+    count("statJoin", o.join_roles);
+
+    setText("tagStream", stream || "");
+    setText("tagAnn", !ann.channel_id ? "" : ann.auto ? "Automatisch" : "Aus");
+    setText("tagWardogs", o.wardogs && o.wardogs.code ? o.wardogs.code : "");
+    setText("tagJoin", `${o.join_roles} aktiv`);
+    setText("tagTodos", `${o.open_todos} offen`);
 
     setNode("Streamplan", stream || "Kein Plan");
     setNode("Ankündigung", !ann.channel_id ? "Standard" : ann.auto ? "Automatisch" : "Aus");
@@ -435,7 +445,7 @@ document.addEventListener("DOMContentLoaded", () => {
     setNode("Todos", `${o.open_todos} offen`);
   }
 
-  loadOverview().catch((e) => toast(esc(e.message)));
+  loadOverview().catch((e) => toastError(esc(e.message)));
 
   /* =========================================================
     CORE KLICK → AKTUALISIEREN
@@ -735,7 +745,7 @@ document.addEventListener("DOMContentLoaded", () => {
   function runRefresh() {
     if (refreshing) return;
 
-    loadOverview().catch((e) => toast(esc(e.message)));
+    loadOverview().catch((e) => toastError(esc(e.message)));
 
     if (reduceMotion.matches) {
       runSimpleRefresh();

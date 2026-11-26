@@ -8,6 +8,7 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="icon" href="img/MedicOnFire_Logo.png" type="image/png">
+    <link href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css" rel="stylesheet">
     <link href="css/dashboard.css" rel="stylesheet">
 </head>
 
@@ -68,15 +69,18 @@
             </div>
             <div class="col-lg-6">
                 <div class="card p-4">
-                    <h6 class="mb-3">Vorschau</h6>
-                    <div class="preview">
-                        <div><strong class="text-white">MedicOnFire</strong> <small class="text-secondary">heute</small></div>
-                        <div id="pv_ping" class="mt-1"></div>
-                        <div class="embed" id="pv_embed">
-                            <h6 id="pv_title"></h6>
-                            <div id="pv_text" class="mb-2"></div>
-                            <div id="pv_time" class="small text-secondary"></div>
-                            <a id="pv_link" class="small" href="#"></a>
+                    <div class="section-title mb-3">Live-Vorschau</div>
+                    <div class="preview dc-msg">
+                        <div class="dc-pfp"></div>
+                        <div class="flex-grow-1">
+                            <strong class="text-white">MedicOnFire</strong> <span class="dc-bot">BOT</span> <small class="text-secondary">heute</small>
+                            <div id="pv_ping" class="mt-1"></div>
+                            <div class="embed" id="pv_embed">
+                                <h6 id="pv_title"></h6>
+                                <div id="pv_text" class="mb-2"></div>
+                                <div id="pv_time" class="small text-secondary"></div>
+                                <a id="pv_link" class="small" href="#"></a>
+                            </div>
                         </div>
                     </div>
                 </div>

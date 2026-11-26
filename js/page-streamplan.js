@@ -27,6 +27,7 @@ function planLines() {
 function updateStreamplan() {
   $$('.day').forEach(r => {
     const on = $('input[type=checkbox]', r).checked;
+    r.classList.toggle('on', on);
     $$('input.form-control', r).forEach(i => i.disabled = !on);
     $('input[type=time]', r).required = on; // Browser meldet halb ausgefüllte Uhrzeit (--:30) statt leer zu senden
   });
@@ -36,7 +37,11 @@ function updateStreamplan() {
 }
 
 const form = $('#planForm');
-form.addEventListener('input', updateStreamplan);
+form.addEventListener('input', () => {
+  updateStreamplan();
+  const e = $('#pv_embed'); // kurz aufleuchten, damit man sieht, was sich ändert
+  e.classList.remove('flash'); void e.offsetWidth; e.classList.add('flash');
+});
 updateStreamplan();
 
 /* Anbindung an den Bot: Vorschau wird genau so als Embed gepostet */
@@ -60,7 +65,7 @@ function restore(saved) {
 (async () => {
   try {
     restore(await apiFetch('/api/streamplan'));
-  } catch (e) { toast(esc(e.message)); }
+  } catch (e) { toastError(esc(e.message)); }
 })();
 
 form.addEventListener('submit', async e => {
@@ -77,6 +82,6 @@ form.addEventListener('submit', async e => {
     });
     restore(saved);
     toast('Streamplan in Discord gesendet');
-  } catch (err) { toast(esc(err.message)); }
+  } catch (err) { toastError(esc(err.message)); }
   finally { btn.disabled = false; }
 });

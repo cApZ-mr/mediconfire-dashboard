@@ -1,5 +1,6 @@
 /* Logik für lobby-code.html (Wardogs-Code) */
 const API = '/api/wardogs-code';
+const STALE_AFTER_MS = 1 * 3600 * 1000; // wie STALE_AFTER_HOURS in bot/cogs/wardogs.py
 let current = null;
 
 function ago(iso) {
@@ -19,7 +20,7 @@ function drawCurrent() {
     box.innerHTML = 'Noch kein Code hinterlegt.';
     return;
   }
-  const stale = Date.now() - new Date(current.updated_at) > 3 * 3600 * 1000;
+  const stale = Date.now() - new Date(current.updated_at) > STALE_AFTER_MS;
   box.innerHTML = `
     <div class="fs-3 fw-bold text-body mb-1" style="font-family:monospace">${esc(current.code)}</div>
     <div class="${stale ? 'text-warning' : ''}">${stale ? '⚠️ ' : ''}Gesetzt ${ago(current.updated_at)}${current.updated_by ? ' von ' + esc(current.updated_by.username) : ''}</div>
@@ -27,23 +28,7 @@ function drawCurrent() {
   $('#clearBtn').onclick = clearCode;
 }
 
-async function api(method, body) {
-  const res = await fetch(API, {
-    method,
-    credentials: 'include',
-    headers: body ? { 'Content-Type': 'application/json' } : {},
-    body: body ? JSON.stringify(body) : undefined,
-  });
-  if (res.status === 401) {
-    location.href = 'login.html?next=' + encodeURIComponent(location.pathname);
-    throw new Error('401');
-  }
-  if (!res.ok) {
-    const err = await res.json().catch(() => ({}));
-    throw new Error(typeof err.detail === 'string' ? err.detail : 'Speichern fehlgeschlagen');
-  }
-  return res.json();
-}
+const api = (method, body) => apiFetch(API, method, body);
 
 async function load() {
   try {
@@ -59,7 +44,7 @@ async function clearCode() {
     current = await api('DELETE');
     drawCurrent();
     toast('Code gelöscht');
-  } catch (e) { toast(esc(e.message)); }
+  } catch (e) { toastError(esc(e.message)); }
 }
 
 $('#codeForm').addEventListener('submit', async e => {
@@ -72,7 +57,7 @@ $('#codeForm').addEventListener('submit', async e => {
     drawCurrent();
     toast('Code gespeichert – !wardogs zeigt ihn jetzt an');
   } catch (err) {
-    toast(esc(err.message));
+    toastError(esc(err.message));
   } finally {
     btn.disabled = false;
   }

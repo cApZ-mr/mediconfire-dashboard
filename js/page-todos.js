@@ -19,7 +19,7 @@ async function run(method, body, query = '') {
   try {
     lists = await apiFetch('/api/todos' + query, method, body);
   } catch (err) {
-    toast(esc(err.message));
+    toastError(esc(err.message));
     lists = await apiFetch('/api/todos').catch(() => lists); // nach Fehler frischen Stand zeigen
   }
   drawTodos();
@@ -30,7 +30,8 @@ todosList.addEventListener('click', e => {
   if (!el) return;
   const list = el.dataset.list, index = +el.dataset.i;
   if ('done' in el.dataset) {
-    run('DELETE', undefined, `?list=${encodeURIComponent(list)}&index=${index}`);
+    el.closest('.list-row').classList.add('leaving'); // rausgleiten, dann löschen
+    setTimeout(() => run('DELETE', undefined, `?list=${encodeURIComponent(list)}&index=${index}`), 250);
   } else {
     const v = prompt('Todo bearbeiten', lists[list][index]); // TODO: eigenes Modal
     if (v?.trim()) run('PUT', { list, index, text: v.trim() });

@@ -37,7 +37,7 @@ $('#saveRoles').onclick = async () => {
     roles = await apiFetch('/api/join-roles', 'PUT', roles);
     drawRoles();
     toast('Join Roles gespeichert – gilt ab dem nächsten Beitritt');
-  } catch (err) { toast(esc(err.message)); }
+  } catch (err) { toastError(esc(err.message)); }
 };
 
 (async () => {
@@ -48,5 +48,5 @@ $('#saveRoles').onclick = async () => {
       + list.map(r => `<option value="${r.id}">${esc(r.name)}</option>`).join('');
     roles = saved;
     drawRoles();
-  } catch (e) { toast(esc(e.message)); }
+  } catch (e) { toastError(esc(e.message)); }
 })();

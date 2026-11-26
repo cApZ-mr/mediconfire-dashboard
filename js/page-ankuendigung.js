@@ -39,7 +39,7 @@ const payload = () => ({
       $('#a_auto').checked = saved.auto;
     }
     updateAnkuendigung();
-  } catch (e) { toast(esc(e.message)); }
+  } catch (e) { toastError(esc(e.message)); }
 })();
 
 annForm.addEventListener('submit', async e => {
@@ -47,12 +47,12 @@ annForm.addEventListener('submit', async e => {
   try {
     await apiFetch('/api/announcement', 'PUT', payload());
     toast('Ankündigung gespeichert – der Bot nutzt sie beim nächsten Live-Start');
-  } catch (err) { toast(esc(err.message)); }
+  } catch (err) { toastError(esc(err.message)); }
 });
 
 $('#testBtn').onclick = async () => {
   try {
     await apiFetch('/api/announcement/test', 'POST', payload());
     toast('Testnachricht in Discord gesendet');
-  } catch (err) { toast(esc(err.message)); }
+  } catch (err) { toastError(esc(err.message)); }
 };
