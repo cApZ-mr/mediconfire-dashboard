@@ -435,6 +435,39 @@ h1, h2, h3, h4, h5, h6 { letter-spacing: -.025em; font-weight: 800 }
 .embed.flash { animation: flash 1s var(--ease) }
 @keyframes flash { from { box-shadow: inset 0 0 0 999px rgba(255, 106, 0, .22) } }
 
+/* Admin: Mitglied suchen */
+.min-w-0 { min-width: 0 }
+.flex-none { flex: none }
+.member-results { display: flex; flex-direction: column; gap: 2px; margin-top: .5rem }
+.member-item {
+    display: flex;
+    align-items: center;
+    gap: .75rem;
+    width: 100%;
+    padding: .55rem .7rem;
+    border: 1px solid transparent;
+    border-radius: 12px;
+    background: transparent;
+    color: inherit;
+    text-align: left;
+    transition: background .2s, border-color .2s;
+    animation: reveal .35s var(--ease) both;
+}
+button.member-item:hover { background: rgba(255, 255, 255, .05); border-color: var(--line-2) }
+.member-item.is-chosen { background: rgba(255, 255, 255, .04); border-color: var(--line-2) }
+
+.btn-danger {
+    border: 0;
+    color: #fff;
+    background: linear-gradient(135deg, #ff6b6b, #e5383b);
+    box-shadow: 0 10px 30px -12px rgba(229, 56, 59, .7);
+}
+.btn-danger:hover { color: #fff; transform: translateY(-1px); background: linear-gradient(135deg, #ff7f7f, #ee4447) }
+.btn-danger:disabled { color: #fff; background: #3a2224; box-shadow: none; opacity: .6 }
+
+.info-list { margin: 0; padding-left: 1.1rem; color: var(--muted); font-size: .9rem }
+.info-list li { margin-bottom: .35rem }
+
 .emoji-box { width: 32px; height: 32px; flex: none; display: grid; place-items: center; border-radius: 8px; background: rgba(255, 255, 255, .04) }
 
 /* Live-Ankündigung (wie der echte Twitch-Post) */

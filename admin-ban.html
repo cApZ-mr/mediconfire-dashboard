@@ -1,24 +1,63 @@
 <!DOCTYPE html>
 <html lang="de" data-bs-theme="dark">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>MedicOnFire</title>
+    <title>Ban – MedicOnFire</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🔥</text></svg>">
+    <link rel="icon" href="img/MedicOnFire_Logo.png" type="image/png">
     <link href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css" rel="stylesheet">
     <link href="css/dashboard.css" rel="stylesheet">
 </head>
-<body>
+
+<body data-action="ban">
     <div id="app-header"></div>
     <main class="container py-5">
-        <h1 class="page-title">TODO</h1>
-        <div class="card p-4">
-            <p class="text-secondary mb-0">Noch leer.</p>
+        <div class="eyebrow mb-1" style="color:var(--danger)">Admin</div>
+        <h1 class="page-title">Ban</h1>
+        <p class="text-secondary mb-4">Ein Mitglied dauerhaft sperren. Es kann nicht wieder beitreten, bis du es entbannst.</p>
+        <div class="row g-4">
+            <div class="col-lg-7">
+                <form class="card p-4" id="actForm">
+                    <label class="form-label" for="m_search">Mitglied</label>
+                    <div class="picker">
+                        <input class="form-control" id="m_search" placeholder="Name oder Nickname suchen …" autocomplete="off">
+                        <div class="member-results" id="m_results"></div>
+                    </div>
+                    <div id="m_chosen"></div>
+                    <div class="mt-3">
+                        <label class="form-label" for="delDays">Nachrichten mit löschen</label>
+                        <select class="form-select" id="delDays">
+                            <option value="0">Keine</option>
+                            <option value="1">Letzte 24 Stunden</option>
+                            <option value="7">Letzte 7 Tage</option>
+                        </select>
+                    </div>
+                    <div class="mt-3">
+                        <label class="form-label" for="reason">Grund <span class="text-secondary fw-normal">(steht im Discord-Audit-Log)</span></label>
+                        <input class="form-control" id="reason" maxlength="400" placeholder="z. B. Spam im Chat">
+                    </div>
+                    <div class="d-flex flex-wrap gap-2 mt-4">
+                        <button class="btn btn-danger" type="submit" id="actBtn" disabled><i class="ti ti-ban" aria-hidden="true"></i> Bannen</button>
+                    </div>
+                </form>
+            </div>
+            <div class="col-lg-5">
+                <div class="card p-4">
+                    <div class="d-flex align-items-center gap-2 mb-2">
+                        <div class="section-title">Gebannt</div>
+                        <span class="tag" id="banCount">…</span>
+                    </div>
+                    <div id="bans"><p class="text-secondary small mb-0">Lädt …</p></div>
+                </div>
+            </div>
         </div>
     </main>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="js/common.js"></script>
+    <script src="js/page-admin.js"></script>
 </body>
+
 </html>
