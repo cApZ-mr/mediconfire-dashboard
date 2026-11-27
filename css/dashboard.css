@@ -477,6 +477,8 @@ button.member-item:hover { background: rgba(255, 255, 255, .05); border-color: v
 
 /* Streamplan */
 .entry-row { padding: .35rem 0 }
+.spontan-toggle { font-weight: 600; font-size: .85rem }
+.btn-check:checked + .spontan-toggle { background: var(--accent); border-color: var(--accent); color: #160800 }
 .dc-code {
     padding: .1em .3em;
     border-radius: 4px;

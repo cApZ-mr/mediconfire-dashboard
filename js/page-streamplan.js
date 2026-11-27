@@ -1,7 +1,7 @@
-/* Logik für streamplan.html – frei hinzufügbare Streams, als Tabelle gesendet */
+/* Logik für streamplan.html – frei hinzufügbare Streams, Tag für Tag gesendet */
 const DAYS = ['Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag', 'Samstag', 'Sonntag'];
 const SPONTAN = 'Spontan';
-let entries = []; // [{ day: 0-6, time: '19:30' | '', title: '' }]
+let entries = []; // [{ day: 0-6, time: '19:30' | '', spontan: bool, title: '' }] – spontan = ohne feste Uhrzeit
 const form = $('#planForm');
 
 /* ---------- Einträge bearbeiten ---------- */
@@ -14,11 +14,15 @@ function drawEntries() {
           ${DAYS.map((d, n) => `<option value="${n}" ${n === e.day ? 'selected' : ''}>${d}</option>`).join('')}
         </select>
       </div>
-      <div class="col-6 col-md-3">
-        <input type="time" class="form-control" data-k="time" value="${esc(e.time)}" aria-label="Uhrzeit (leer = spontan)" title="Leer lassen für spontan">
+      <div class="col-6 col-md-5">
+        <div class="input-group flex-nowrap">
+          <input type="time" class="form-control" data-k="time" value="${esc(e.time)}" aria-label="Uhrzeit" ${e.spontan ? 'disabled' : 'required'}>
+          <input type="checkbox" class="btn-check" id="sp${i}" data-k="spontan" ${e.spontan ? 'checked' : ''} autocomplete="off">
+          <label class="btn btn-outline-light spontan-toggle" for="sp${i}" title="Ohne feste Uhrzeit">Spontan</label>
+        </div>
       </div>
-      <div class="col-10 col-md-5">
-        <input class="form-control" data-k="title" value="${esc(e.title)}" maxlength="60" placeholder="Titel oder Spiel (leer = ${SPONTAN})" aria-label="Titel">
+      <div class="col-10 col-md-3">
+        <input class="form-control" data-k="title" value="${esc(e.title)}" maxlength="60" placeholder="Titel oder Spiel${e.spontan ? ' (optional)' : ` (leer = ${SPONTAN})`}" aria-label="Titel">
       </div>
       <div class="col-2 col-md-1 text-end">
         <button class="btn btn-outline-light btn-sm" type="button" data-del aria-label="Eintrag entfernen"><i class="ti ti-x" aria-hidden="true"></i></button>
@@ -30,7 +34,15 @@ function drawEntries() {
 $('#entries').addEventListener('input', e => {
   const row = e.target.closest('[data-i]'), k = e.target.dataset.k;
   if (!row || !k) return;
-  entries[+row.dataset.i][k] = k === 'day' ? +e.target.value : e.target.value;
+  const entry = entries[+row.dataset.i];
+  if (k === 'spontan') {
+    entry.spontan = e.target.checked;
+    if (entry.spontan) entry.time = ''; // spontan = keine Uhrzeit (so liest es auch der Bot)
+    drawEntries();
+    if (!entry.spontan) $(`[data-i="${row.dataset.i}"] [data-k="time"]`).focus();
+    return;
+  }
+  entry[k] = k === 'day' ? +e.target.value : e.target.value;
 });
 
 $('#entries').addEventListener('click', e => {
@@ -43,7 +55,7 @@ $('#entries').addEventListener('click', e => {
 $('#addEntry').onclick = () => {
   if (entries.length >= 30) return toastError('Maximal 30 Streams');
   const last = entries[entries.length - 1];
-  entries.push({ day: last ? Math.min(last.day + 1, 6) : 0, time: '', title: '' }); // nächster Tag als Vorschlag
+  entries.push({ day: last ? Math.min(last.day + 1, 6) : 0, time: '', spontan: false, title: '' }); // nächster Tag als Vorschlag
   drawEntries();
   updateStreamplan();
   $('#entries [data-i]:last-child [data-k="time"]').focus();
@@ -57,7 +69,6 @@ $('#clearEntries').onclick = () => {
 };
 
 /* ---------- Plan bauen: ein Embed-Feld pro Tag (Tag fett, Uhrzeiten in fester Breite) ---------- */
-const NO_TIME = '--:--'; // gleiche Breite wie 19:30 -> Titel stehen bündig untereinander
 
 function planFields() {
   const fields = [];
@@ -66,7 +77,11 @@ function planFields() {
       .filter(e => e.day === d)
       .sort((a, b) => (a.time || '99').localeCompare(b.time || '99')); // spontan ans Ende
     if (today.length) {
-      fields.push({ name: day, value: today.map(e => `\`${e.time || NO_TIME}\`  ${e.title.trim() || SPONTAN}`).join('\n') });
+      fields.push({ name: day, value: today.map(e => {
+        const title = e.title.trim();
+        if (e.spontan || !e.time) return `\`${SPONTAN}\`` + (title ? `  ${title}` : ''); // kein doppeltes "Spontan"
+        return `\`${e.time}\`  ${title || SPONTAN}`;
+      }).join('\n') });
     } else if ($('#showPause').checked) {
       fields.push({ name: day, value: '*Pause*' });
     }
@@ -94,11 +109,11 @@ form.addEventListener('input', () => {
 
 /* ---------- Gespeicherten Stand laden (auch aus älteren Formaten) ---------- */
 function entriesFrom(f) {
-  if (Array.isArray(f.entries)) return f.entries.map(e => ({ day: +e.day, time: e.time || '', title: e.title || '' }));
+  if (Array.isArray(f.entries)) return f.entries.map(e => ({ day: +e.day, time: e.time || '', spontan: e.spontan ?? !e.time, title: e.title || '' }));
   const out = []; // älteres Format: ein Eintrag pro Tag (mode0 / on0, time0, title0)
   DAYS.forEach((_, d) => {
     const mode = f[`mode${d}`] || (f[`on${d}`] ? 'plan' : 'off');
-    if (mode !== 'off') out.push({ day: d, time: mode === 'plan' ? f[`time${d}`] || '' : '', title: f[`title${d}`] || '' });
+    if (mode !== 'off') out.push({ day: d, time: mode === 'plan' ? f[`time${d}`] || '' : '', spontan: mode === 'spontan', title: f[`title${d}`] || '' });
   });
   return out;
 }
