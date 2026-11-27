@@ -92,7 +92,7 @@ $('#users').addEventListener('change', async e => {
       // beim Herabstufen auf die Liste bisherige Bereiche behalten (ohne Benutzer verwalten)
       await save(p, { level, perms: level === 'list' ? p.perms.filter(x => x !== 'users') : [] });
       toast(`${p.name} ist jetzt ${LEVEL_TEXT[level]}`);
-    } catch (err) { toastError(esc(err.message)); sel.value = p.level; }
+    } catch (err) { toastError(err.message); sel.value = p.level; }
     return;
   }
   const box = e.target.closest('[data-perm]');
@@ -107,7 +107,7 @@ $('#users').addEventListener('change', async e => {
   try {
     await save(p, { perms });
     toast('Rechte gespeichert');
-  } catch (err) { toastError(esc(err.message)); drawUsers(); }
+  } catch (err) { toastError(err.message); drawUsers(); }
 });
 
 $('#users').addEventListener('click', async e => {
@@ -121,7 +121,7 @@ $('#users').addEventListener('click', async e => {
       await reload();
       toast(`${p.name} entfernt`);
     }
-  } catch (err) { toastError(esc(err.message)); }
+  } catch (err) { toastError(err.message); }
 });
 
 $('#userFilter').addEventListener('input', e => { filter = e.target.value.trim(); drawUsers(); });
@@ -147,7 +147,7 @@ $('#m_search').addEventListener('input', e => {
           <div class="small text-secondary">${blocked ? esc(info.levels[known.level]) : '@' + esc(m.username)}</div></div>
         </button>`;
       }).join('') : '<div class="small text-secondary p-2">Niemand gefunden.</div>';
-    } catch (err) { toastError(esc(err.message)); }
+    } catch (err) { toastError(err.message); }
   }, 250);
 });
 
@@ -161,7 +161,7 @@ $('#m_results').addEventListener('click', async e => {
     $('#m_results').innerHTML = '';
     await reload();
     toast(`${m.display} hinzugefügt – jetzt Rechte vergeben`);
-  } catch (err) { toastError(esc(err.message)); }
+  } catch (err) { toastError(err.message); }
 });
 
 (async () => {
@@ -169,5 +169,5 @@ $('#m_results').addEventListener('click', async e => {
     me = (await apiFetch('/auth/me')).user;
     await reload();
     drawRoleInfo();
-  } catch (err) { toastError(esc(err.message)); }
+  } catch (err) { toastError(err.message); }
 })();

@@ -51,7 +51,7 @@ async function run(method, body, query = '') {
   try {
     lists = await apiFetch('/api/todos' + query, method, body);
   } catch (err) {
-    toastError(esc(err.message));
+    toastError(err.message);
     lists = await apiFetch('/api/todos').catch(() => lists); // nach Fehler frischen Stand zeigen
   }
   drawTodos();

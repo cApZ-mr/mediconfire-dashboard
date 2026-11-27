@@ -152,7 +152,7 @@ form.addEventListener('submit', async e => {
     });
     restore(saved);
     toast('Streamplan in Discord gesendet');
-  } catch (err) { toastError(esc(err.message)); }
+  } catch (err) { toastError(err.message); }
   finally { btn.disabled = false; }
 });
 
@@ -179,7 +179,7 @@ $('#saveSettings').onclick = async () => {
       reminder: { enabled: $('#remOn').checked, minutes: +$('#remMin').value },
     });
     toast('Pings & Erinnerung gespeichert');
-  } catch (err) { toastError(esc(err.message)); }
+  } catch (err) { toastError(err.message); }
 };
 
 (async () => {
@@ -190,5 +190,5 @@ $('#saveSettings').onclick = async () => {
     $('#remOn').checked = !!saved.reminder?.enabled;
     if (saved.reminder?.minutes) $('#remMin').value = saved.reminder.minutes;
     drawPings(roles);
-  } catch (err) { toastError(esc(err.message)); }
+  } catch (err) { toastError(err.message); }
 })();

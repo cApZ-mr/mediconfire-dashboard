@@ -439,6 +439,23 @@ h1, h2, h3, h4, h5, h6 { letter-spacing: -.025em; font-weight: 800 }
 .embed.flash { animation: flash 1s var(--ease) }
 @keyframes flash { from { box-shadow: inset 0 0 0 999px rgba(255, 106, 0, .22) } }
 
+/* Nur ansehen (Recht fehlt) */
+.readonly-banner {
+    display: flex;
+    align-items: center;
+    gap: .6rem;
+    margin-bottom: 1.5rem;
+    padding: .75rem 1rem;
+    border-radius: 14px;
+    background: rgba(255, 255, 255, .04);
+    border: 1px solid var(--line-2);
+    color: #cfcfd6;
+    font-weight: 600;
+}
+.readonly-banner i { font-size: 1.2rem; color: var(--accent) }
+.read-only [data-write] button,
+.read-only [data-write] [type=submit] { display: none !important }
+
 /* Nur für Admins/Moderatoren sichtbar */
 body:not(.is-admin) .admin-only { display: none !important }
 

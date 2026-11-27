@@ -29,6 +29,29 @@ const NAV = [
     ]},
 ];
 
+// Lesbare Namen der Rechte (wie im Backend, web/server.py PERMS)
+const PERM_NAMES = {
+    stream: 'Streamplan & Ankündigung', messages: 'Nachrichten (Wardogs, Embeds)', roles: 'Join & Select Roles',
+    todos: 'Todos', moderation: 'Moderation', users: 'Benutzer verwalten',
+};
+
+// Fehlt das Recht der Seite (body data-need): alles in [data-write] sperren, Aktions-Buttons ausblenden
+function applyReadOnly(perms) {
+    const need = document.body.dataset.need;
+    if (!need || perms.includes(need)) return;
+    document.body.classList.add('read-only');
+    $('main').insertAdjacentHTML('afterbegin', `
+      <div class="readonly-banner"><i class="ti ti-eye" aria-hidden="true"></i>
+        <span>Nur ansehen – zum Ändern fehlt dir die Berechtigung „${esc(PERM_NAMES[need] || need)}“.</span></div>`);
+    const lock = () => $$('[data-write]').forEach(w => {
+        [w, ...$$('input, select, textarea, button', w)].forEach(el => {
+            if ('disabled' in el && !el.disabled) el.disabled = true;
+        });
+    });
+    lock();
+    new MutationObserver(lock).observe($('main'), { childList: true, subtree: true }); // auch später nachgeladene Zeilen
+}
+
 const icon = name => `<i class="ti ti-${name}" aria-hidden="true"></i>`;
 
 function navRender(cur, user) {
@@ -117,7 +140,8 @@ function toast(msg, isError = false) {
     const t = document.createElement('div');
     t.className = 'toast' + (isError ? ' is-error' : '');
     t.setAttribute('role', isError ? 'alert' : 'status');
-    t.innerHTML = `<div class="toast-body fw-semibold">${icon(isError ? 'alert-circle' : 'circle-check')}<span>${msg}</span></div>`;
+    t.innerHTML = `<div class="toast-body fw-semibold">${icon(isError ? 'alert-circle' : 'circle-check')}<span></span></div>`;
+    $('span', t).textContent = msg; // immer als Text – Namen kommen aus Discord und könnten HTML enthalten
     c.append(t);
     t.addEventListener('hidden.bs.toast', () => t.remove());
     new bootstrap.Toast(t, { delay: isError ? 4500 : 2500 }).show();
@@ -207,17 +231,18 @@ document.addEventListener('pointerdown', e => {
 
 fetch('/auth/me', { credentials: 'include' })
     .then(r => r.ok ? r.json() : Promise.reject())
-    .then(data => {
-        document.body.classList.toggle('is-admin', !!data.user.admin);
-        const perms = data.user.perms || [];
-        const needs = /admin-/.test(location.pathname) ? 'moderation' : /benutzer/.test(location.pathname) ? 'users' : null;
-        if (needs && !perms.includes(needs)) { location.href = 'index.html'; return; } // Server prüft zusätzlich
-        renderHeader(data.user);
-        const h = new Date().getHours(), g = $('#greeting');
-        if (g) g.textContent = `${h < 11 ? 'Guten Morgen' : h < 18 ? 'Hallo' : 'Guten Abend'}, ${data.user.username}`;
-        revealPage();
-        document.documentElement.style.visibility = 'visible';
-    })
-    .catch(() => {
-        location.href = 'login.html?next=' + encodeURIComponent(location.pathname);
-    });
+    // Nur ein fehlgeschlagener Login führt zur Anmeldeseite – Fehler beim Seitenaufbau nicht (sonst Schleife)
+    .then(startPage, () => { location.href = 'login.html?next=' + encodeURIComponent(location.pathname); });
+
+function startPage(data) {
+    document.body.classList.toggle('is-admin', !!data.user.admin);
+    const perms = data.user.perms || [];
+    const needs = /admin-/.test(location.pathname) ? 'moderation' : /benutzer/.test(location.pathname) ? 'users' : null;
+    if (needs && !perms.includes(needs)) { location.href = 'index.html'; return; } // Server prüft zusätzlich
+    renderHeader(data.user);
+    applyReadOnly(perms);
+    const h = new Date().getHours(), g = $('#greeting');
+    if (g) g.textContent = `${h < 11 ? 'Guten Morgen' : h < 18 ? 'Hallo' : 'Guten Abend'}, ${data.user.username}`;
+    revealPage();
+    document.documentElement.style.visibility = 'visible';
+}

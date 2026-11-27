@@ -46,7 +46,7 @@ async function clearCode() {
     current = await api('DELETE');
     drawCurrent();
     toast('Code gelöscht');
-  } catch (e) { toastError(esc(e.message)); }
+  } catch (e) { toastError(e.message); }
 }
 
 $('#codeForm').addEventListener('submit', async e => {
@@ -59,7 +59,7 @@ $('#codeForm').addEventListener('submit', async e => {
     drawCurrent();
     toast('Code gespeichert – !wardogs zeigt ihn jetzt an');
   } catch (err) {
-    toastError(esc(err.message));
+    toastError(err.message);
   } finally {
     btn.disabled = false;
   }
@@ -70,7 +70,7 @@ $('#expire').addEventListener('change', async e => {
     current = await apiFetch(API + '/expire', 'PUT', { hours: +e.target.value });
     drawCurrent();
     toast(+e.target.value ? `Code läuft jetzt nach ${e.target.selectedOptions[0].text} ab` : 'Code läuft nicht mehr automatisch ab');
-  } catch (err) { toastError(esc(err.message)); }
+  } catch (err) { toastError(err.message); }
 });
 
 load().then(() => { $('#expire').value = String(current?.expire_hours || 0); });

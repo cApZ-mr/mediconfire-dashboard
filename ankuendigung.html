@@ -12,14 +12,14 @@
     <link href="css/dashboard.css" rel="stylesheet">
 </head>
 
-<body>
+<body data-need="stream">
     <div id="app-header"></div>
     <main class="container py-5">
         <h1 class="page-title">Stream-Ankündigung</h1>
         <p class="text-secondary mb-4">Sobald jemand auf Twitch live geht, postet der Bot diese Nachricht automatisch. Streamtitel, Spiel und Vorschaubild kommen direkt von Twitch – hier passt du den Rest an.</p>
         <div class="row g-4">
             <div class="col-lg-6">
-                <form class="card p-4" id="annForm">
+                <form class="card p-4" id="annForm" data-write>
                     <div class="row g-3">
                         <div class="col-12">
                             <div class="form-check form-switch">
@@ -59,7 +59,7 @@
                         <button class="btn btn-outline-light" type="button" id="testBtn"><i class="ti ti-send" aria-hidden="true"></i> Test senden</button>
                     </div>
                 </form>
-                <div class="card p-4 mt-4">
+                <div class="card p-4 mt-4" data-write>
                     <div class="section-title mb-2">Überwachte Twitch-Kanäle</div>
                     <p class="form-text mt-0 mb-3">Geht einer dieser Kanäle live, postet der Bot die Ankündigung. Änderungen gelten ab der nächsten Minute.</p>
                     <div class="d-flex flex-wrap gap-2 mb-3" id="twitchUsers"></div>

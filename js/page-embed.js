@@ -117,7 +117,7 @@ form.addEventListener('submit', async e => {
     toast(res.edited ? 'Nachricht in Discord aktualisiert' : 'Embed in Discord gesendet');
     $('#lastLink').innerHTML = `Zuletzt: <a href="${esc(res.link)}" target="_blank" rel="noopener">Nachricht öffnen</a> · <a href="#" id="useLast">diese bearbeiten</a>`;
     $('#useLast').onclick = ev => { ev.preventDefault(); $('#e_edit').value = res.link; syncSendLabel(); };
-  } catch (err) { toastError(esc(err.message)); }
+  } catch (err) { toastError(err.message); }
   finally { btn.disabled = false; }
 });
 
@@ -136,7 +136,7 @@ $('#e_edit').addEventListener('input', syncSendLabel);
     const roles = await apiFetch('/api/roles');
     $('#e_ping').insertAdjacentHTML('beforeend', roles.map(r => `<option value="${r.id}">@${esc(r.name)}</option>`).join(''));
     await fillChannels($('#e_channel'), draft.channel_id);
-  } catch (err) { toastError(esc(err.message)); }
+  } catch (err) { toastError(err.message); }
   Object.entries(map).forEach(([k, id]) => { if (draft[k] != null) $('#' + id).value = draft[k]; });
   $('#e_ts').checked = !!draft.timestamp;
   $('#e_thumb').checked = draft.thumbnail === true; // alte Entwürfe hatten hier Links

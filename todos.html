@@ -12,7 +12,7 @@
     <link href="css/dashboard.css" rel="stylesheet">
 </head>
 
-<body>
+<body data-need="todos">
     <div id="app-header"></div>
     <main class="container py-5">
         <div class="d-flex align-items-end mb-4">
@@ -20,7 +20,7 @@
                 <h1 class="page-title">Todos</h1>
                 <p class="text-secondary mb-0">Dieselben Listen wie <code>!todo</code>, <code>!todos</code> und <code>!done</code> im Discord.</p>
             </div><span class="ms-auto badge rounded-pill badge-prio fs-6" id="openCount"></span></div>
-        <form class="card p-3 mb-3" id="addTodo">
+        <form class="card p-3 mb-3" id="addTodo" data-write>
             <div class="row g-2">
                 <div class="col-md">
                     <input class="form-control" id="t_text" placeholder="Was ist zu tun?" aria-label="Neues Todo" required>
@@ -41,7 +41,7 @@
                 <option value="count">Meiste Todos zuerst</option>
             </select>
         </div>
-        <div id="todos" class="d-flex flex-column gap-3"></div>
+        <div id="todos" class="d-flex flex-column gap-3" data-write></div>
     </main>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="js/common.js"></script>

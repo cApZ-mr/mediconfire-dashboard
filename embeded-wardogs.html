@@ -12,13 +12,13 @@
     <link href="css/dashboard.css" rel="stylesheet">
 </head>
 
-<body>
+<body data-need="messages">
     <div id="app-header"></div>
     <main class="container py-5">
         <h1 class="page-title">Wardogs Code</h1>
         <p class="text-secondary mb-4">Trage hier den aktuellen Lobby-Code ein. Mit <code>!wardogs</code> schickt der Bot ihn in den Chat – inklusive Alter des Codes.</p>
         <div class="col-lg-5">
-            <form class="card p-4 mb-3" id="codeForm" autocomplete="off">
+            <form class="card p-4 mb-3" id="codeForm" autocomplete="off" data-write>
                 <div class="mb-3">
                     <label class="form-label" for="code">Lobby-Code</label>
                     <input class="form-control form-control-lg" id="code" name="code" maxlength="32" required
@@ -29,9 +29,9 @@
             </form>
             <div class="card p-4">
                 <h6 class="mb-3">Aktuell beim Bot</h6>
-                <div id="current" class="text-secondary">Lädt …</div>
+                <div id="current" class="text-secondary" data-write>Lädt …</div>
             </div>
-            <div class="card p-4 mt-3">
+            <div class="card p-4 mt-3" data-write>
                 <label class="form-label" for="expire">Code automatisch verwerfen nach</label>
                 <select class="form-select" id="expire">
                     <option value="0">Nie</option>

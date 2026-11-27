@@ -127,7 +127,7 @@ $('#panels').addEventListener('click', async e => {
       toast('Panel in Discord gesendet');
       sentCount[key] = (sentCount[key] || 0) + 1;
       redrawRefresh(key);
-    } catch (err) { toastError(esc(err.message)); }
+    } catch (err) { toastError(err.message); }
   } else if (e.target.closest('[data-refresh]')) {
     try {
       // erst speichern, damit die Panels den aktuellen Text bekommen
@@ -136,7 +136,7 @@ $('#panels').addEventListener('click', async e => {
       sentCount[key] = res.updated;
       redrawRefresh(key);
       toast(`${res.updated} Panel${res.updated === 1 ? '' : 's'} aktualisiert`);
-    } catch (err) { toastError(esc(err.message)); }
+    } catch (err) { toastError(err.message); }
   }
 });
 
@@ -146,7 +146,7 @@ $('#panels').addEventListener('submit', async e => {
   try {
     panels[key] = await apiFetch(`/api/selfroles/${key}`, 'PUT', panels[key]);
     toast('Gespeichert – gilt beim nächsten Klick auf „Rollen auswählen“');
-  } catch (err) { toastError(esc(err.message)); }
+  } catch (err) { toastError(err.message); }
 });
 
 (async () => {
@@ -161,5 +161,5 @@ $('#panels').addEventListener('submit', async e => {
     emojis = emo;
     channelOptions = channels.map(c => `<option value="${c.id}">#${esc(c.name)}</option>`).join('');
     draw();
-  } catch (err) { toastError(esc(err.message)); }
+  } catch (err) { toastError(err.message); }
 })();

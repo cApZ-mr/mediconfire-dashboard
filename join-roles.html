@@ -12,20 +12,20 @@
     <link href="css/dashboard.css" rel="stylesheet">
 </head>
 
-<body>
+<body data-need="roles">
     <div id="app-header"></div>
     <main class="container py-5">
         <h1 class="page-title">Join Roles</h1>
         <p class="text-secondary mb-4">Diese Rollen bekommen neue Mitglieder automatisch beim Beitritt.</p>
         <div class="row g-4">
             <div class="col-lg-7">
-                <div class="card p-4">
+                <div class="card p-4" data-write>
                     <div id="roles"></div>
                     <button class="btn btn-primary mt-3 align-self-start" id="saveRoles" type="button">Änderungen speichern</button>
                 </div>
             </div>
             <div class="col-lg-5">
-                <form class="card p-4" id="addRole">
+                <form class="card p-4" id="addRole" data-write>
                     <h5 class="mb-3">Rolle hinzufügen</h5>
                     <div class="mb-3">
                         <label class="form-label" for="r_name">Rolle</label>

@@ -33,7 +33,7 @@ $('#logKind').addEventListener('change', drawServerLog);
   try {
     actions = await apiFetch('/api/history');
     drawHistory();
-  } catch (err) { toastError(esc(err.message)); }
+  } catch (err) { toastError(err.message); }
   try {
     serverLog = await apiFetch('/api/server-log');
     drawServerLog();

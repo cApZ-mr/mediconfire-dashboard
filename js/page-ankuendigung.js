@@ -42,7 +42,7 @@ const payload = () => ({
       $('#a_auto').checked = saved.auto !== false;
     }
     updateAnkuendigung();
-  } catch (e) { toastError(esc(e.message)); }
+  } catch (e) { toastError(e.message); }
 })();
 
 annForm.addEventListener('submit', async e => {
@@ -50,14 +50,14 @@ annForm.addEventListener('submit', async e => {
   try {
     await apiFetch('/api/announcement', 'PUT', payload());
     toast($('#a_auto').checked ? 'Gespeichert – gilt beim nächsten Streamstart' : 'Gespeichert – automatische Ankündigung ist aus');
-  } catch (err) { toastError(esc(err.message)); }
+  } catch (err) { toastError(err.message); }
 });
 
 $('#testBtn').onclick = async () => {
   try {
     await apiFetch('/api/announcement/test', 'POST', payload());
     toast('Testnachricht in Discord gesendet');
-  } catch (err) { toastError(esc(err.message)); }
+  } catch (err) { toastError(err.message); }
 };
 
 /* Überwachte Twitch-Kanäle */
@@ -76,7 +76,7 @@ async function saveTwitchUsers(next) {
     twitchUsers = await apiFetch('/api/twitch-users', 'PUT', { users: next });
     drawTwitchUsers();
     toast('Twitch-Kanäle gespeichert');
-  } catch (err) { toastError(esc(err.message)); }
+  } catch (err) { toastError(err.message); }
 }
 
 $('#twitchUsers').addEventListener('click', e => {
@@ -94,4 +94,4 @@ $('#twitchAdd').addEventListener('submit', e => {
   saveTwitchUsers([...twitchUsers, name]);
 });
 
-apiFetch('/api/twitch-users').then(u => { twitchUsers = u; drawTwitchUsers(); }).catch(err => toastError(esc(err.message)));
+apiFetch('/api/twitch-users').then(u => { twitchUsers = u; drawTwitchUsers(); }).catch(err => toastError(err.message));

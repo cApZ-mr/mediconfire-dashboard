@@ -33,7 +33,7 @@ function setupPicker() {
           ? res.map((m, i) => `<button type="button" class="member-item" data-i="${i}">${memberHtml(m)}</button>`).join('')
           : '<div class="small text-secondary p-2">Niemand gefunden.</div>';
         box._results = res;
-      } catch (err) { toastError(esc(err.message)); }
+      } catch (err) { toastError(err.message); }
     }, 250);
   });
 
@@ -68,7 +68,7 @@ async function act(path, body, confirmText, doneText) {
     if (doneText) toast(doneText);
     return res;
   } catch (err) {
-    toastError(esc(err.message));
+    toastError(err.message);
     return null;
   } finally {
     btn.disabled = !target && ACTION !== 'delete';
@@ -113,7 +113,7 @@ const ACTIONS = {
             <small class="text-secondary text-truncate d-none d-md-block" style="max-width:40%">${esc(b.reason || '')}</small>
             <button class="btn btn-outline-light btn-sm" type="button" data-unban="${b.id}" data-name="${esc(b.display)}">Entbannen</button>
           </div>`).join('') : '<p class="text-secondary small mb-0">Niemand gebannt.</p>';
-      } catch (err) { toastError(esc(err.message)); }
+      } catch (err) { toastError(err.message); }
     };
 
     $('#actForm').addEventListener('submit', async e => {
@@ -130,7 +130,7 @@ const ACTIONS = {
         await apiFetch('/api/admin/bans/' + b.dataset.unban, 'DELETE');
         toast(`${b.dataset.name} wurde entbannt`);
         loadBans();
-      } catch (err) { toastError(esc(err.message)); }
+      } catch (err) { toastError(err.message); }
     });
     loadBans();
   },
@@ -143,7 +143,7 @@ const ACTIONS = {
         await apiFetch('/api/admin/delete-message', 'POST', { link: $('#msgLink').value.trim() });
         toast('Nachricht gelöscht');
         $('#msgLink').value = '';
-      } catch (err) { toastError(esc(err.message)); }
+      } catch (err) { toastError(err.message); }
     });
 
     $('#actForm').addEventListener('submit', async e => {
@@ -153,7 +153,7 @@ const ACTIONS = {
         `Die letzten ${n} Nachrichten in ${ch} löschen?`, '');
       if (res) toast(`${res.deleted} gelöscht` + (res.skipped_old ? `, ${res.skipped_old} ${res.skipped_old === 1 ? 'war' : 'waren'} älter als 14 Tage und ${res.skipped_old === 1 ? 'blieb' : 'blieben'} stehen` : ''));
     });
-    fillChannels($('#purgeChannel')).catch(err => toastError(esc(err.message)));
+    fillChannels($('#purgeChannel')).catch(err => toastError(err.message));
   },
 };
 

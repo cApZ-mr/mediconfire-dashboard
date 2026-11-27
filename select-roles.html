@@ -12,12 +12,12 @@
     <link href="css/dashboard.css" rel="stylesheet">
 </head>
 
-<body>
+<body data-need="roles">
     <div id="app-header"></div>
     <main class="container py-5">
         <h1 class="page-title">Select Roles</h1>
         <p class="text-secondary mb-4">Rollen, die sich Mitglieder über den Button <strong>Rollen auswählen</strong> selbst geben können. Änderungen gelten sofort – auch bei Panels, die schon im Discord stehen.</p>
-        <div class="row g-4" id="panels">
+        <div class="row g-4" id="panels" data-write>
             <div class="col-12"><div class="card p-4 text-secondary">Lädt …</div></div>
         </div>
     </main>

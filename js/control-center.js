@@ -453,7 +453,7 @@ document.addEventListener("DOMContentLoaded", () => {
     setNode("Todos", `${o.open_todos} offen`);
   }
 
-  loadOverview().catch((e) => toastError(esc(e.message)));
+  loadOverview().catch((e) => toastError(e.message));
 
   /* =========================================================
     CORE KLICK → AKTUALISIEREN
@@ -753,7 +753,7 @@ document.addEventListener("DOMContentLoaded", () => {
   function runRefresh() {
     if (refreshing) return;
 
-    loadOverview().catch((e) => toastError(esc(e.message)));
+    loadOverview().catch((e) => toastError(e.message));
 
     if (reduceMotion.matches) {
       runSimpleRefresh();
