@@ -1,24 +1,127 @@
 <!DOCTYPE html>
 <html lang="de" data-bs-theme="dark">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>MedicOnFire</title>
+    <title>Embed senden – MedicOnFire</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🔥</text></svg>">
+    <link rel="icon" href="img/MedicOnFire_Logo.png" type="image/png">
     <link href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css" rel="stylesheet">
     <link href="css/dashboard.css" rel="stylesheet">
 </head>
+
 <body>
     <div id="app-header"></div>
     <main class="container py-5">
-        <h1 class="page-title">TODO</h1>
-        <div class="card p-4">
-            <p class="text-secondary mb-0">Noch leer.</p>
-        </div>
+        <h1 class="page-title">Embed senden</h1>
+        <p class="text-secondary mb-4">Gestalte eine eigene Embed-Nachricht und schick sie in einen beliebigen Kanal. Dein Entwurf bleibt in diesem Browser gespeichert.</p>
+        <form id="embedForm" autocomplete="off">
+            <div class="row g-4">
+                <div class="col-lg-6">
+                    <div class="card p-4 mb-3">
+                        <div class="section-title mb-3">Ziel</div>
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label" for="e_channel">Kanal</label>
+                                <select class="form-select" id="e_channel" name="channel_id" required>
+                                    <option value="">Lädt …</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label" for="e_ping">Ping</label>
+                                <select class="form-select" id="e_ping" name="ping">
+                                    <option value="">Niemand</option>
+                                    <option value="everyone">@everyone</option>
+                                </select>
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label" for="e_content">Text über dem Embed <span class="text-secondary fw-normal">(optional)</span></label>
+                                <input class="form-control" id="e_content" name="content" maxlength="1800">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card p-4 mb-3">
+                        <div class="section-title mb-3">Inhalt</div>
+                        <div class="row g-3">
+                            <div class="col-12">
+                                <label class="form-label" for="e_author">Autor-Zeile</label>
+                                <input class="form-control" id="e_author" name="author" maxlength="256" placeholder="MedicOnFire">
+                            </div>
+                            <div class="col-md-7">
+                                <label class="form-label" for="e_title">Titel</label>
+                                <input class="form-control" id="e_title" name="title" maxlength="256" placeholder="Neues Event am Samstag">
+                            </div>
+                            <div class="col-md-5">
+                                <label class="form-label" for="e_url">Titel-Link</label>
+                                <input class="form-control" id="e_url" name="url" type="url" maxlength="500" placeholder="https://…">
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label" for="e_desc">Beschreibung</label>
+                                <textarea class="form-control" id="e_desc" name="description" rows="5" maxlength="4096" placeholder="Discord-Formatierung geht: **fett**, *kursiv*, [Link](https://…)"></textarea>
+                                <div class="form-text text-end"><span id="descCount">0</span> / 4096</div>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label" for="e_color">Farbe</label>
+                                <input class="form-control form-control-color w-100" type="color" id="e_color" name="color" value="#ff6a00">
+                            </div>
+                            <div class="col-md-8">
+                                <label class="form-label" for="e_footer">Fußzeile</label>
+                                <input class="form-control" id="e_footer" name="footer" maxlength="2048">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label" for="e_thumb">Kleines Bild rechts (URL)</label>
+                                <input class="form-control" id="e_thumb" name="thumbnail" type="url" maxlength="500" placeholder="https://…">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label" for="e_image">Großes Bild unten (URL)</label>
+                                <input class="form-control" id="e_image" name="image" type="url" maxlength="500" placeholder="https://…">
+                            </div>
+                            <div class="col-12">
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" id="e_ts" name="timestamp">
+                                    <label class="form-check-label" for="e_ts">Zeitstempel in der Fußzeile</label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card p-4">
+                        <div class="d-flex align-items-center mb-3">
+                            <div class="section-title">Felder</div>
+                            <button class="btn btn-outline-light btn-sm ms-auto" type="button" id="addField"><i class="ti ti-plus" aria-hidden="true"></i> Feld</button>
+                        </div>
+                        <div id="fields"></div>
+                    </div>
+                </div>
+
+                <div class="col-lg-6">
+                    <div class="sticky-lg-top" style="top:90px">
+                        <div class="card p-4 mb-3">
+                            <div class="section-title mb-3">Live-Vorschau</div>
+                            <div class="preview dc-msg">
+                                <div class="dc-pfp"></div>
+                                <div class="flex-grow-1" style="min-width:0">
+                                    <strong class="text-white">MedicOnFire BOT</strong> <span class="dc-bot">APP</span> <small class="text-secondary">heute</small>
+                                    <div id="pv_content" class="mt-1" style="white-space:pre-line"></div>
+                                    <div class="embed live-embed" id="pv_embed"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="d-flex flex-wrap gap-2">
+                            <button class="btn btn-primary flex-grow-1" type="submit" id="sendBtn"><i class="ti ti-send" aria-hidden="true"></i> In Discord senden</button>
+                            <button class="btn btn-outline-light" type="button" id="resetBtn">Leeren</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </form>
     </main>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="js/common.js"></script>
+    <script src="js/page-embed.js"></script>
 </body>
+
 </html>

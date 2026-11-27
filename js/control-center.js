@@ -439,7 +439,7 @@ document.addEventListener("DOMContentLoaded", () => {
     setNode("Streamplan", stream || "Kein Plan");
     setNode("Ankündigung", !ann.channel_id ? "Standard" : ann.auto ? "Automatisch" : "Aus");
     setNode("Wardogs Nachrichten", o.wardogs && o.wardogs.code ? `Code: ${o.wardogs.code}` : "Kein Code");
-    setNode("Sonstige", "Bald");
+    setNode("Sonstige", "Embed senden");
     setNode("Join Roles", `${o.join_roles} aktiv`);
     setNode("Select Roles", "Bald");
     setNode("Todos", `${o.open_todos} offen`);

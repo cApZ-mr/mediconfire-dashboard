@@ -13,7 +13,7 @@ const NAV = [
     ]},
     { label: 'Nachrichten', icon: 'message', items: [
         ['embeded-wardogs.html', 'Wardogs Code', 'key'],
-        ['embeded-sonstige.html', 'Sonstige', 'dots'],
+        ['embeded-sonstige.html', 'Eigenes Embed', 'layout-cards'],
     ]},
     { label: 'Rollen', icon: 'users', items: [
         ['join-roles.html', 'Join Roles', 'user-plus'],
