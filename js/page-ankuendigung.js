@@ -1,29 +1,30 @@
-/* Logik für ankuendigung.html */
+/* Logik für ankuendigung.html – Aufbau wie bot/live_embed.py */
 const annForm = $('#annForm');
+const DEFAULT_LIVE = '{name} ist jetzt LIVE auf Twitch!';
+const streamer = 'm3diconfire'; // nur für die Vorschau
 
 function updateAnkuendigung() {
-  const g = id => $('#' + id).value;
   const ping = $('#a_ping').selectedOptions[0];
-  $('#pv_ping').innerHTML = ping && ping.value ? `<span class="ping">${esc(ping.text)}</span> ` : '';
-  $('#pv_title').textContent = g('a_title') || 'Titel';
-  $('#pv_text').textContent = g('a_text') || 'Beschreibung';
-  $('#pv_link').textContent = g('a_link');
-  $('#pv_embed').style.borderLeftColor = g('a_color');
-  const t = g('a_time');
-  $('#pv_time').textContent = t ? 'Start: ' + new Date(t).toLocaleString('de-DE', { dateStyle: 'medium', timeStyle: 'short' }) + ' Uhr' : '';
+  $('#pv_ping').innerHTML = ping && ping.value ? `<span class="ping">${esc(ping.text)}</span>` : '';
+  $('#pv_live').textContent = ($('#a_live').value || DEFAULT_LIVE).replaceAll('{name}', streamer);
+  $('#pv_text').textContent = $('#a_text').value;
+  $('#pv_embed').style.borderLeftColor = $('#a_color').value;
+  annForm.classList.toggle('opacity-75', !$('#a_auto').checked);
 }
 
-annForm.addEventListener('input', updateAnkuendigung);
+annForm.addEventListener('input', () => {
+  updateAnkuendigung();
+  const e = $('#pv_embed');
+  e.classList.remove('flash'); void e.offsetWidth; e.classList.add('flash');
+});
 updateAnkuendigung();
 
 /* Anbindung an den Bot */
 const payload = () => ({
   channel_id: $('#a_channel').value,
   ping: $('#a_ping').value,
-  title: $('#a_title').value,
+  live_text: $('#a_live').value,
   text: $('#a_text').value,
-  time: $('#a_time').value,
-  link: $('#a_link').value,
   color: $('#a_color').value,
   auto: $('#a_auto').checked,
 });
@@ -34,9 +35,11 @@ const payload = () => ({
     $('#a_ping').insertAdjacentHTML('beforeend', roles.map(r => `<option value="${r.id}">@${esc(r.name)}</option>`).join(''));
     await fillChannels($('#a_channel'), saved.channel_id);
     if (saved.channel_id) {
-      $('#a_ping').value = saved.ping;
-      ['title', 'text', 'time', 'link', 'color'].forEach(k => { $('#a_' + k).value = saved[k] ?? ''; });
-      $('#a_auto').checked = saved.auto;
+      $('#a_ping').value = saved.ping ?? '';
+      $('#a_live').value = saved.live_text ?? '';
+      $('#a_text').value = saved.text ?? '';
+      $('#a_color').value = saved.color || '#9b59b6';
+      $('#a_auto').checked = saved.auto !== false;
     }
     updateAnkuendigung();
   } catch (e) { toastError(esc(e.message)); }
@@ -46,7 +49,7 @@ annForm.addEventListener('submit', async e => {
   e.preventDefault();
   try {
     await apiFetch('/api/announcement', 'PUT', payload());
-    toast('Ankündigung gespeichert – der Bot nutzt sie beim nächsten Live-Start');
+    toast($('#a_auto').checked ? 'Gespeichert – gilt beim nächsten Streamstart' : 'Gespeichert – automatische Ankündigung ist aus');
   } catch (err) { toastError(esc(err.message)); }
 });
 

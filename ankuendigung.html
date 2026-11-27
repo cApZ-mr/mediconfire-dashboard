@@ -16,11 +16,17 @@
     <div id="app-header"></div>
     <main class="container py-5">
         <h1 class="page-title">Stream-Ankündigung</h1>
-        <p class="text-secondary mb-4">So sieht die Nachricht aus, wenn dein Stream startet. Der Bot nutzt diese Einstellungen beim automatischen Live-Ping.</p>
+        <p class="text-secondary mb-4">Sobald jemand auf Twitch live geht, postet der Bot diese Nachricht automatisch. Streamtitel, Spiel und Vorschaubild kommen direkt von Twitch – hier passt du den Rest an.</p>
         <div class="row g-4">
             <div class="col-lg-6">
                 <form class="card p-4" id="annForm">
                     <div class="row g-3">
+                        <div class="col-12">
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" id="a_auto" name="auto" checked>
+                                <label class="form-check-label fw-semibold" for="a_auto">Automatisch posten, wenn ein Stream startet</label>
+                            </div>
+                        </div>
                         <div class="col-md-6">
                             <label class="form-label" for="a_channel">Kanal</label>
                             <select class="form-select" id="a_channel" name="channel" required>
@@ -35,35 +41,22 @@
                             </select>
                         </div>
                         <div class="col-12">
-                            <label class="form-label" for="a_title">Titel</label>
-                            <input class="form-control" id="a_title" name="title" value="Wir sind live!">
+                            <label class="form-label" for="a_live">Live-Zeile</label>
+                            <input class="form-control" id="a_live" name="live_text" maxlength="200" placeholder="{name} ist jetzt LIVE auf Twitch!">
+                            <div class="form-text"><code>{name}</code> wird durch den Twitch-Namen ersetzt. Leer lassen für den Standardtext.</div>
                         </div>
                         <div class="col-12">
-                            <label class="form-label" for="a_text">Beschreibung</label>
-                            <textarea class="form-control" id="a_text" name="text" rows="4">Heute geht's um Ranked. Kommt vorbei!</textarea>
+                            <label class="form-label" for="a_text">Zusatztext <span class="text-secondary fw-normal">(optional)</span></label>
+                            <textarea class="form-control" id="a_text" name="text" rows="3" maxlength="3000" placeholder="Kommt vorbei, heute gibt's Drops!"></textarea>
                         </div>
                         <div class="col-md-6">
-                            <label class="form-label" for="a_time">Startzeit</label>
-                            <input class="form-control" type="datetime-local" id="a_time" name="time">
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label" for="a_link">Stream-Link</label>
-                            <input class="form-control" type="url" id="a_link" name="link" value="https://twitch.tv/dein-kanal">
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label" for="a_color">Farbe</label>
-                            <input class="form-control form-control-color w-100" type="color" id="a_color" name="color" value="#ff6a00">
-                        </div>
-                        <div class="col-md-6 d-flex align-items-end">
-                            <div class="form-check form-switch">
-                                <input class="form-check-input" type="checkbox" id="a_auto" name="auto" checked>
-                                <label class="form-check-label" for="a_auto">Automatisch beim Start senden</label>
-                            </div>
+                            <label class="form-label" for="a_color">Farbe am Rand</label>
+                            <input class="form-control form-control-color w-100" type="color" id="a_color" name="color" value="#9b59b6">
                         </div>
                     </div>
-                    <div class="d-flex gap-2 mt-4">
+                    <div class="d-flex flex-wrap gap-2 mt-4">
                         <button class="btn btn-primary" type="submit">Änderungen speichern</button>
-                        <button class="btn btn-outline-light" type="button" id="testBtn">Test senden</button>
+                        <button class="btn btn-outline-light" type="button" id="testBtn"><i class="ti ti-send" aria-hidden="true"></i> Test senden</button>
                     </div>
                 </form>
             </div>
@@ -72,17 +65,25 @@
                     <div class="section-title mb-3">Live-Vorschau</div>
                     <div class="preview dc-msg">
                         <div class="dc-pfp"></div>
-                        <div class="flex-grow-1">
-                            <strong class="text-white">MedicOnFire</strong> <span class="dc-bot">BOT</span> <small class="text-secondary">heute</small>
+                        <div class="flex-grow-1" style="min-width:0">
+                            <strong class="text-white">MedicOnFire BOT</strong> <span class="dc-bot">APP</span> <small class="text-secondary">heute</small>
                             <div id="pv_ping" class="mt-1"></div>
-                            <div class="embed" id="pv_embed">
-                                <h6 id="pv_title"></h6>
-                                <div id="pv_text" class="mb-2"></div>
-                                <div id="pv_time" class="small text-secondary"></div>
-                                <a id="pv_link" class="small" href="#"></a>
+                            <div class="embed live-embed" id="pv_embed">
+                                <div class="live-embed-head">
+                                    <div style="min-width:0">
+                                        <a class="live-title" href="#" onclick="return false">[DROPS] Beispiel-Streamtitel | WARDOGS | DE</a>
+                                        <div class="mt-2"><span aria-hidden="true">🔴</span> <strong class="text-white" id="pv_live"></strong></div>
+                                        <div id="pv_text" class="mt-2" style="white-space:pre-line"></div>
+                                    </div>
+                                    <img class="live-thumb" src="img/MedicOnFire_Logo.png" alt="">
+                                </div>
+                                <div class="mt-2"><strong class="text-white">🎮 Spiel</strong><div>WARDOGS</div></div>
+                                <div class="live-image"><i class="ti ti-brand-twitch" aria-hidden="true"></i><span>Stream-Vorschaubild von Twitch</span></div>
+                                <div class="small mt-2">Twitch • live now</div>
                             </div>
                         </div>
                     </div>
+                    <p class="form-text mt-3 mb-0">Streamtitel, Spiel und Bilder sind hier nur Beispiele – im echten Post stehen die Daten vom Stream.</p>
                 </div>
             </div>
         </div>
