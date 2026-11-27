@@ -2,7 +2,8 @@
 let info = null; // Antwort von /api/users
 let me = null;   // eingeloggter Benutzer (mit level)
 const PERM_ICON = { stream: 'broadcast', messages: 'message', roles: 'users', todos: 'checklist', moderation: 'shield', users: 'users-group' };
-const LEVEL_STYLE = { owner: 'level-owner', supermod: 'level-supermod', list: 'level-list' };
+const LEVEL_STYLE = { owner: 'level-owner', supermod: 'level-supermod', moderator: 'level-moderator', list: 'level-list' };
+const LIST_PERMS = () => Object.entries(info.perms).filter(([k]) => k !== 'users'); // Benutzer verwalten: nur Super-Mods
 let filter = '';
 
 const isOwner = () => me?.level === 'owner';
@@ -10,23 +11,25 @@ const label = p => p.title || info.levels[p.level];                      // z. B
 const badgeClass = p => (p.title === 'Techniker' ? 'level-tech' : LEVEL_STYLE[p.level]);
 
 function chips(p) {
-  return Object.entries(info.perms).map(([key, label]) => `
+  return LIST_PERMS().map(([key, label]) => `
       <input type="checkbox" class="btn-check" id="p_${p.id}_${key}" data-perm="${key}" ${p.perms.includes(key) ? 'checked' : ''} autocomplete="off">
       <label class="btn btn-outline-light btn-sm perm-chip" for="p_${p.id}_${key}"><i class="ti ti-${PERM_ICON[key]}" aria-hidden="true"></i> ${esc(label)}</label>`).join('');
 }
 
 function actions(p) {
-  if (p.level === 'owner') return '';
-  const out = [];
-  if (isOwner()) {
-    out.push(p.level === 'supermod'
-      ? `<button class="btn btn-outline-light btn-sm" type="button" data-level="list">Super-Mod entziehen</button>`
-      : `<button class="btn btn-outline-light btn-sm" type="button" data-level="supermod"><i class="ti ti-star" aria-hidden="true"></i> Super-Mod</button>`);
-  }
-  if (p.level !== 'supermod' || isOwner()) {
-    out.push(`<button class="btn btn-outline-light btn-sm" type="button" data-remove aria-label="Entfernen"><i class="ti ti-user-minus" aria-hidden="true"></i></button>`);
-  }
-  return out.join('');
+  if (p.level === 'owner' || (p.level === 'supermod' && !isOwner())) return ''; // Super-Mods ändern nur Inhaber
+  const options = [['list', 'Benutzerliste'], ['moderator', 'Moderator'], ...(isOwner() ? [['supermod', 'Super-Mod']] : [])];
+  return `
+    <select class="form-select form-select-sm" data-level-select aria-label="Stufe von ${esc(p.name)}" style="width:auto">
+      ${options.map(([v, n]) => `<option value="${v}" ${p.level === v ? 'selected' : ''}>${n}</option>`).join('')}
+    </select>
+    <button class="btn btn-outline-light btn-sm" type="button" data-remove aria-label="Entfernen"><i class="ti ti-user-minus" aria-hidden="true"></i></button>`;
+}
+
+function summary(p) {
+  if (p.level === 'list') return p.perms.length ? `${p.perms.length} von ${LIST_PERMS().length} Bereichen` : 'Nur ansehen';
+  if (p.level === 'moderator') return 'alles außer Rechte verwalten';
+  return 'alle Rechte';
 }
 
 function drawUsers() {
@@ -46,8 +49,8 @@ function drawUsers() {
           <span class="level-badge ${badgeClass(p)}">${esc(label(p))}</span>
           ${p.id === me?.id ? '<span class="tag">du</span>' : ''}
         </div>
-        <div class="small text-secondary mb-2">${p.level === 'list' ? (p.perms.length ? p.perms.length + ' von ' + Object.keys(info.perms).length + ' Bereichen' : 'Nur ansehen') : 'alle Rechte'}${p.added_by ? ' · hinzugefügt von ' + esc(p.added_by) : ''}</div>
-        ${p.level === 'owner' || p.level === 'supermod' ? '' : `<div class="d-flex flex-wrap gap-1">${chips(p)}</div>`}
+        <div class="small text-secondary mb-2">${summary(p)}${p.added_by ? ' · hinzugefügt von ' + esc(p.added_by) : ''}</div>
+        ${p.level === 'list' ? `<div class="d-flex flex-wrap gap-1">${chips(p)}</div>` : ''}
       </div>
       <div class="d-flex flex-column align-items-end gap-1 flex-none">${actions(p)}</div>
     </div>`).join('')
@@ -58,7 +61,8 @@ function drawRoleInfo() {
   $('#roleInfo').innerHTML = `
     <li><strong>Inhaber</strong> und <strong>Techniker</strong>: alles, auch Super-Mods vergeben.</li>
     <li><strong>Super-Mod</strong>: alles inkl. Benutzer verwalten – aber Inhaber und Super-Mods nicht ändern. Vergeben nur Inhaber.</li>
-    <li><strong>Benutzerliste</strong>: nur die angehakten Bereiche.</li>
+    <li><strong>Moderator</strong>: alles außer Rechte verwalten – sieht diesen Reiter nicht.</li>
+    <li><strong>Benutzerliste</strong>: nur die angehakten Bereiche – sieht diesen Reiter nicht.</li>
     <li>Discord-Rollen und Server-Rechte geben <strong>keinen</strong> Zugang – nur diese Liste zählt. Bots können nicht hinzugefügt werden.</li>`;
 }
 
@@ -70,14 +74,27 @@ async function reload() {
 async function save(p, changes) {
   await apiFetch('/api/users', 'PUT', {
     id: p.id, name: p.name, avatar: p.avatar,
-    perms: p.level === 'supermod' ? [] : p.perms, level: p.level === 'supermod' ? 'supermod' : 'list', ...changes,
+    perms: p.level === 'list' ? p.perms : [], level: p.level, ...changes,
   });
   await reload();
 }
 
 const byId = id => info.users.find(p => p.id === id);
 
+const LEVEL_TEXT = { list: 'Benutzerliste (einzelne Rechte)', moderator: 'Moderator', supermod: 'Super-Mod' };
+
 $('#users').addEventListener('change', async e => {
+  const sel = e.target.closest('[data-level-select]');
+  if (sel) {
+    const p = byId(sel.closest('[data-id]').dataset.id), level = sel.value;
+    if (!confirm(`${p.name} auf „${LEVEL_TEXT[level]}“ setzen?`)) { sel.value = p.level; return; }
+    try {
+      // beim Herabstufen auf die Liste bisherige Bereiche behalten (ohne Benutzer verwalten)
+      await save(p, { level, perms: level === 'list' ? p.perms.filter(x => x !== 'users') : [] });
+      toast(`${p.name} ist jetzt ${LEVEL_TEXT[level]}`);
+    } catch (err) { toastError(esc(err.message)); sel.value = p.level; }
+    return;
+  }
   const box = e.target.closest('[data-perm]');
   if (!box) return;
   const p = byId(box.closest('[data-id]').dataset.id);
@@ -98,12 +115,7 @@ $('#users').addEventListener('click', async e => {
   if (!row) return;
   const p = byId(row.dataset.id);
   try {
-    if (e.target.closest('[data-level]')) {
-      const level = e.target.closest('[data-level]').dataset.level;
-      if (!confirm(level === 'supermod' ? `${p.name} zum Super-Mod machen?` : `${p.name} die Super-Mod-Rechte entziehen?`)) return;
-      await save(p, { level });
-      toast(level === 'supermod' ? `${p.name} ist jetzt Super-Mod` : `${p.name} ist kein Super-Mod mehr`);
-    } else if (e.target.closest('[data-remove]')) {
+    if (e.target.closest('[data-remove]')) {
       if (!confirm(`${p.name} aus dem Dashboard entfernen? Danach hat ${p.name} keinen Zugang mehr.`)) return;
       await apiFetch('/api/users/' + p.id, 'DELETE');
       await reload();
