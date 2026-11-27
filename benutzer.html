@@ -16,14 +16,16 @@
     <div id="app-header"></div>
     <main class="container py-5">
         <h1 class="page-title">Benutzer &amp; Rechte</h1>
-        <p class="text-secondary mb-4">Wer ins Dashboard darf und was er dort ändern kann. Ansehen dürfen alle hier – ändern nur die Bereiche, die angehakt sind. Änderungen gelten sofort.</p>
+        <p class="text-secondary mb-4">Alle, die aufs Dashboard zugreifen können – und was sie dort ändern dürfen. Ansehen dürfen alle hier. Änderungen gelten sofort.</p>
         <div class="row g-4">
             <div class="col-lg-8">
                 <div class="card p-4">
-                    <div class="d-flex align-items-center gap-2 mb-2">
-                        <div class="section-title">Benutzer</div>
+                    <div class="d-flex flex-wrap align-items-center gap-2 mb-2">
+                        <div class="section-title">Alle mit Zugang</div>
                         <span class="tag" id="userCount"></span>
+                        <input class="form-control form-control-sm ms-auto" id="userFilter" placeholder="Filtern …" style="max-width:170px" aria-label="Benutzer filtern">
                     </div>
+                    <div class="d-flex flex-wrap gap-1 mb-2" id="levelSummary"></div>
                     <div id="users"><p class="text-secondary small mb-0">Lädt …</p></div>
                 </div>
             </div>
@@ -37,7 +39,7 @@
                     <div class="form-text">Neue Benutzer dürfen zuerst nur ansehen – Rechte danach links anhaken.</div>
                 </div>
                 <div class="card p-4">
-                    <div class="section-title mb-2">Zusätzlich über Discord-Rollen</div>
+                    <div class="section-title mb-2">Stufen</div>
                     <ul class="info-list" id="roleInfo"></ul>
                 </div>
             </div>
