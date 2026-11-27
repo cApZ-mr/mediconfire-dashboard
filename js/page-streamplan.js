@@ -1,97 +1,139 @@
-/* Logik für streamplan.html */
+/* Logik für streamplan.html – frei hinzufügbare Streams, als Tabelle gesendet */
 const DAYS = ['Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag', 'Samstag', 'Sonntag'];
-const MODES = [['off', 'Pause'], ['spontan', 'Spontan'], ['plan', 'Geplant']];
-const NO_TITLE = 'Spontan'; // steht da, wenn bei "Geplant" kein Titel eingetragen ist
+const SPONTAN = 'Spontan';
+let entries = []; // [{ day: 0-6, time: '19:30' | '', title: '' }]
+const form = $('#planForm');
 
-$('#days').innerHTML = DAYS.map((d, i) => `
-  <div class="day row g-2 align-items-center py-3 border-bottom">
-    <div class="col-12 d-flex align-items-center gap-2">
-        <span class="fw-semibold flex-none" style="width:5.8rem">${d}</span>
-        <div class="btn-group btn-group-sm mode-group" role="group" aria-label="${d}">
-          ${MODES.map(([v, label]) => `
-            <input type="radio" class="btn-check" name="mode${i}" id="m${v}${i}" value="${v}" ${v === 'off' ? 'checked' : ''}>
-            <label class="btn btn-outline-light" for="m${v}${i}">${label}</label>`).join('')}
-        </div>
-    </div>
-    <div class="col-4 col-md-3">
-        <input type="time" class="form-control" name="time${i}" aria-label="Uhrzeit ${d}">
-    </div>
-    <div class="col-8 col-md-9">
-        <input class="form-control" name="title${i}" placeholder="Titel oder Spiel" aria-label="Titel ${d}">
-    </div>
-  </div>`).join('');
-
-const modeOf = r => $('input[type=radio]:checked', r).value;
-
-function planLines() {
-  return $$('.day').map((r, i) => {
-    const mode = modeOf(r), [t, ti] = $$('input.form-control', r).map(x => x.value.trim());
-    if (mode === 'spontan') return `${DAYS[i]}: Spontan${ti ? ' – ' + ti : ''}`;
-    if (mode === 'plan') return `${DAYS[i]}: ${t ? t + ' Uhr – ' : ''}${ti || NO_TITLE}`;
-    return `${DAYS[i]}: Pause`;
-  }).join('\n');
+/* ---------- Einträge bearbeiten ---------- */
+function drawEntries() {
+  $('#entryCount').textContent = entries.length;
+  $('#entries').innerHTML = entries.length ? entries.map((e, i) => `
+    <div class="row g-2 align-items-center entry-row" data-i="${i}">
+      <div class="col-6 col-md-3">
+        <select class="form-select" data-k="day" aria-label="Tag">
+          ${DAYS.map((d, n) => `<option value="${n}" ${n === e.day ? 'selected' : ''}>${d}</option>`).join('')}
+        </select>
+      </div>
+      <div class="col-6 col-md-3">
+        <input type="time" class="form-control" data-k="time" value="${esc(e.time)}" aria-label="Uhrzeit (leer = spontan)" title="Leer lassen für spontan">
+      </div>
+      <div class="col-10 col-md-5">
+        <input class="form-control" data-k="title" value="${esc(e.title)}" maxlength="60" placeholder="Titel oder Spiel (leer = ${SPONTAN})" aria-label="Titel">
+      </div>
+      <div class="col-2 col-md-1 text-end">
+        <button class="btn btn-outline-light btn-sm" type="button" data-del aria-label="Eintrag entfernen"><i class="ti ti-x" aria-hidden="true"></i></button>
+      </div>
+    </div>`).join('')
+    : '<p class="text-secondary small my-2">Noch kein Stream eingetragen – leg los mit „Stream hinzufügen“.</p>';
 }
 
-function updateStreamplan() {
-  $$('.day').forEach(r => {
-    const mode = modeOf(r), time = $('input[type=time]', r), title = $('input[name^=title]', r);
-    r.classList.toggle('on', mode !== 'off');
-    time.disabled = mode !== 'plan';      // bei "Spontan" gibt es keine feste Uhrzeit
-    time.required = mode === 'plan';      // Browser meldet halb ausgefüllte Uhrzeit (--:30) statt leer zu senden
-    title.disabled = mode === 'off';
-    title.placeholder = mode === 'plan' ? `Titel oder Spiel (leer = ${NO_TITLE})` : 'Titel oder Spiel (optional)';
+$('#entries').addEventListener('input', e => {
+  const row = e.target.closest('[data-i]'), k = e.target.dataset.k;
+  if (!row || !k) return;
+  entries[+row.dataset.i][k] = k === 'day' ? +e.target.value : e.target.value;
+});
+
+$('#entries').addEventListener('click', e => {
+  if (!e.target.closest('[data-del]')) return;
+  entries.splice(+e.target.closest('[data-i]').dataset.i, 1);
+  drawEntries();
+  updateStreamplan();
+});
+
+$('#addEntry').onclick = () => {
+  if (entries.length >= 30) return toastError('Maximal 30 Streams');
+  const last = entries[entries.length - 1];
+  entries.push({ day: last ? Math.min(last.day + 1, 6) : 0, time: '', title: '' }); // nächster Tag als Vorschlag
+  drawEntries();
+  updateStreamplan();
+  $('#entries [data-i]:last-child [data-k="time"]').focus();
+};
+
+$('#clearEntries').onclick = () => {
+  if (entries.length && !confirm('Alle Streams aus dem Plan entfernen?')) return;
+  entries = [];
+  drawEntries();
+  updateStreamplan();
+};
+
+/* ---------- Plan bauen: ein Embed-Feld pro Tag (Tag fett, Uhrzeiten in fester Breite) ---------- */
+const NO_TIME = '--:--'; // gleiche Breite wie 19:30 -> Titel stehen bündig untereinander
+
+function planFields() {
+  const fields = [];
+  DAYS.forEach((day, d) => {
+    const today = entries
+      .filter(e => e.day === d)
+      .sort((a, b) => (a.time || '99').localeCompare(b.time || '99')); // spontan ans Ende
+    if (today.length) {
+      fields.push({ name: day, value: today.map(e => `\`${e.time || NO_TIME}\`  ${e.title.trim() || SPONTAN}`).join('\n') });
+    } else if ($('#showPause').checked) {
+      fields.push({ name: day, value: '*Pause*' });
+    }
   });
+  return fields;
+}
+
+// Discord-Formatierung für die Vorschau: `code` und *kursiv*
+const fmt = t => esc(t).replace(/`(.+?)`/g, '<code class="dc-code">$1</code>').replace(/\*(.+?)\*/g, '<em>$1</em>');
+
+function updateStreamplan() {
   $('#pv_title').textContent = $('#ptitle').value;
-  $('#pv_lines').textContent = planLines();
+  const fields = planFields();
+  $('#pv_lines').innerHTML = fields.length
+    ? fields.map(f => `<div class="mb-2"><div class="text-white fw-bold small">${esc(f.name)}</div><div class="small" style="white-space:pre-line">${fmt(f.value)}</div></div>`).join('')
+    : '<span class="text-secondary small">Noch keine Streams eingetragen.</span>';
   $('#pv_foot').textContent = $('#pfoot').value;
 }
 
-const form = $('#planForm');
 form.addEventListener('input', () => {
   updateStreamplan();
   const e = $('#pv_embed'); // kurz aufleuchten, damit man sieht, was sich ändert
   e.classList.remove('flash'); void e.offsetWidth; e.classList.add('flash');
 });
-updateStreamplan();
 
-/* Anbindung an den Bot: Vorschau wird genau so als Embed gepostet */
+/* ---------- Gespeicherten Stand laden (auch aus älteren Formaten) ---------- */
+function entriesFrom(f) {
+  if (Array.isArray(f.entries)) return f.entries.map(e => ({ day: +e.day, time: e.time || '', title: e.title || '' }));
+  const out = []; // älteres Format: ein Eintrag pro Tag (mode0 / on0, time0, title0)
+  DAYS.forEach((_, d) => {
+    const mode = f[`mode${d}`] || (f[`on${d}`] ? 'plan' : 'off');
+    if (mode !== 'off') out.push({ day: d, time: mode === 'plan' ? f[`time${d}`] || '' : '', title: f[`title${d}`] || '' });
+  });
+  return out;
+}
+
 function restore(saved) {
-  if (saved.form) {
-    $('#replace').checked = false; // FormData enthält nur angehakte Checkboxen
-    $$('input[type=radio][value=off]', form).forEach(c => { c.checked = true; });
-    Object.entries(saved.form).forEach(([k, v]) => {
-      const old = k.match(/^on(\d)$/); // älteres Format: Schalter an = geplant
-      if (old) { k = 'mode' + old[1]; v = 'plan'; }
-      const el = form.elements[k];
-      if (!el) return;
-      if (el.type === 'checkbox') el.checked = true;
-      else el.value = v; // klappt auch für Radio-Gruppen
-    });
+  const f = saved.form;
+  if (f) {
+    entries = entriesFrom(f);
+    if (f.ptitle != null) $('#ptitle').value = f.ptitle;
+    if (f.pfoot != null) $('#pfoot').value = f.pfoot;
+    $('#showPause').checked = f.show_pause !== false;
   }
   if (saved.updated_at) {
     $('#lastSent').textContent = 'Zuletzt gesendet: ' + new Date(saved.updated_at).toLocaleString('de-DE')
       + (saved.updated_by ? ' von ' + saved.updated_by.username : '');
   }
+  drawEntries();
   updateStreamplan();
 }
 
-(async () => {
-  try {
-    restore(await apiFetch('/api/streamplan'));
-  } catch (e) { toastError(esc(e.message)); }
-})();
+drawEntries();
+updateStreamplan();
 
 form.addEventListener('submit', async e => {
   e.preventDefault();
+  if (!entries.length && !$('#showPause').checked) return toastError('Der Plan ist leer');
   const btn = $('#sendBtn');
   btn.disabled = true;
   try {
     const saved = await apiFetch('/api/streamplan', 'POST', {
       title: $('#ptitle').value,
-      lines: planLines(),
+      fields: planFields(),
       footer: $('#pfoot').value,
       replace: $('#replace').checked,
-      form: Object.fromEntries(new FormData(form)),
+      form: { entries, show_pause: $('#showPause').checked, ptitle: $('#ptitle').value, pfoot: $('#pfoot').value },
     });
     restore(saved);
     toast('Streamplan in Discord gesendet');
@@ -99,7 +141,7 @@ form.addEventListener('submit', async e => {
   finally { btn.disabled = false; }
 });
 
-/* Pings & Erinnerung (eigene Speicherung, unabhängig vom Senden) */
+/* ---------- Pings & Erinnerung (eigene Speicherung, unabhängig vom Senden) ---------- */
 let pingIds = [];
 
 function drawPings(roles) {
@@ -128,6 +170,7 @@ $('#saveSettings').onclick = async () => {
 (async () => {
   try {
     const [saved, roles] = await Promise.all([apiFetch('/api/streamplan'), apiFetch('/api/roles')]);
+    restore(saved);
     pingIds = saved.ping_roles || [];
     $('#remOn').checked = !!saved.reminder?.enabled;
     if (saved.reminder?.minutes) $('#remMin').value = saved.reminder.minutes;

@@ -389,13 +389,20 @@ document.addEventListener("DOMContentLoaded", () => {
     const now = new Date();
     const today = (now.getDay() + 6) % 7; // 0 = Montag
     const hhmm = now.toTimeString().slice(0, 5);
+    // Streams als Liste {day, time}; ältere Formate (ein Eintrag pro Tag) umrechnen
+    const entries = Array.isArray(form.entries)
+      ? form.entries
+      : [0, 1, 2, 3, 4, 5, 6].flatMap((d) => {
+          const mode = form[`mode${d}`] || (form[`on${d}`] ? "plan" : "off");
+          return mode === "off" ? [] : [{ day: d, time: mode === "plan" ? form[`time${d}`] || "" : "" }];
+        });
     for (let k = 0; k < 8; k++) {
       const d = (today + k) % 7;
-      const mode = form[`mode${d}`] || (form[`on${d}`] ? "plan" : "off"); // on${d} = älteres Format
-      const time = form[`time${d}`] || "";
-      const day = k === 0 ? "Heute" : WEEKDAYS[d];
-      if (mode === "spontan") return `${day}, spontan`;
-      if (mode === "plan" && (k > 0 || time >= hhmm)) return `${day}${time ? ", " + time : ""}`;
+      const label = k === 0 ? "Heute" : WEEKDAYS[d];
+      const todays = entries
+        .filter((e) => +e.day === d && (k > 0 || !e.time || e.time >= hhmm))
+        .sort((a, b) => (a.time || "99").localeCompare(b.time || "99"));
+      if (todays.length) return todays[0].time ? `${label}, ${todays[0].time}` : `${label}, spontan`;
     }
     return null;
   }

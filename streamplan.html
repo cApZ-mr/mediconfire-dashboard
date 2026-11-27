@@ -16,12 +16,24 @@
     <div id="app-header"></div>
     <main class="container py-5">
         <h1 class="page-title">Streamplan</h1>
-        <p class="text-secondary mb-4">Wähle pro Tag <strong>Pause</strong>, <strong>Spontan</strong> oder <strong>Geplant</strong> und sende den Plan als Embed in den Streamplan-Kanal. Geplant ohne Titel wird als „Spontan“ angezeigt.</p>
+        <p class="text-secondary mb-4">Füge beliebig viele Streams hinzu – auch mehrere am selben Tag. Ohne Uhrzeit oder Titel steht dort „Spontan“. Der Plan wird Tag für Tag mit Logo in den Streamplan-Kanal gesendet.</p>
         <form id="planForm">
             <div class="row g-4">
                 <div class="col-lg-7">
                     <div class="card p-4">
-                        <div id="days"></div>
+                        <div class="d-flex align-items-center gap-2 mb-2">
+                            <div class="section-title">Streams</div>
+                            <span class="tag" id="entryCount"></span>
+                            <button class="btn btn-outline-light btn-sm ms-auto" type="button" id="addEntry"><i class="ti ti-plus" aria-hidden="true"></i> Stream hinzufügen</button>
+                        </div>
+                        <div id="entries"></div>
+                        <div class="d-flex flex-wrap gap-3 mt-3 pt-3" style="border-top:1px solid var(--line)">
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" id="showPause" name="show_pause" checked>
+                                <label class="form-check-label" for="showPause">Tage ohne Stream als „Pause“ zeigen</label>
+                            </div>
+                            <button class="btn btn-outline-light btn-sm ms-auto" type="button" id="clearEntries">Alle entfernen</button>
+                        </div>
                     </div>
                 </div>
                 <div class="col-lg-5">
@@ -65,12 +77,17 @@
                         <div class="section-title mb-3">Live-Vorschau</div>
                         <div class="preview dc-msg">
                             <div class="dc-pfp"></div>
-                            <div class="flex-grow-1">
+                            <div class="flex-grow-1" style="min-width:0">
                                 <strong class="text-white">MedicOnFire</strong> <span class="dc-bot">BOT</span> <small class="text-secondary">heute</small>
                                 <div class="mt-1" id="pv_ping"></div>
-                                <div class="embed" id="pv_embed" style="border-left-color:#e67e22">
-                                    <h6 id="pv_title"></h6>
-                                    <div id="pv_lines" style="white-space:pre-line"></div>
+                                <div class="embed live-embed" id="pv_embed" style="border-left-color:#e67e22">
+                                    <div class="live-embed-head">
+                                        <div class="min-w-0 flex-grow-1">
+                                            <h6 id="pv_title"></h6>
+                                            <div class="mt-2" id="pv_lines"></div>
+                                        </div>
+                                        <img class="live-thumb" src="img/MedicOnFire_Logo.png" alt="">
+                                    </div>
                                     <div id="pv_foot" class="small text-secondary mt-2"></div>
                                 </div>
                             </div>

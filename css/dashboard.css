@@ -475,6 +475,16 @@ button.member-item:hover { background: rgba(255, 255, 255, .05); border-color: v
 .info-list { margin: 0; padding-left: 1.1rem; color: var(--muted); font-size: .9rem }
 .info-list li { margin-bottom: .35rem }
 
+/* Streamplan */
+.entry-row { padding: .35rem 0 }
+.dc-code {
+    padding: .1em .3em;
+    border-radius: 4px;
+    background: #1e1f22;
+    color: #dbdee1;
+    font: .85em Consolas, "SFMono-Regular", Menlo, monospace;
+}
+
 .emoji-box { width: 32px; height: 32px; flex: none; display: grid; place-items: center; border-radius: 8px; background: rgba(255, 255, 255, .04) }
 
 /* Live-Ankündigung (wie der echte Twitch-Post) */
