@@ -34,9 +34,14 @@
                 </div>
             </div>
         </form>
-        <div class="card px-4 py-2">
-            <div id="todos"></div>
+        <div class="d-flex flex-wrap align-items-center gap-2 mb-3">
+            <div class="d-flex flex-wrap gap-2" id="filters" role="group" aria-label="Nach Liste filtern"></div>
+            <select class="form-select form-select-sm ms-auto" id="sort" style="width:auto" aria-label="Sortierung">
+                <option value="name">Listen A–Z</option>
+                <option value="count">Meiste Todos zuerst</option>
+            </select>
         </div>
+        <div id="todos" class="d-flex flex-column gap-3"></div>
     </main>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="js/common.js"></script>
