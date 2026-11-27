@@ -6,6 +6,8 @@ const LEVEL_STYLE = { owner: 'level-owner', supermod: 'level-supermod', list: 'l
 let filter = '';
 
 const isOwner = () => me?.level === 'owner';
+const label = p => p.title || info.levels[p.level];                      // z. B. "Techniker" statt "Inhaber"
+const badgeClass = p => (p.title === 'Techniker' ? 'level-tech' : LEVEL_STYLE[p.level]);
 
 function chips(p) {
   return Object.entries(info.perms).map(([key, label]) => `
@@ -14,7 +16,7 @@ function chips(p) {
 }
 
 function actions(p) {
-  if (p.level === 'owner') return '<span class="small text-secondary"><i class="ti ti-lock" aria-hidden="true"></i> fest im Code</span>';
+  if (p.level === 'owner') return '';
   const out = [];
   if (isOwner()) {
     out.push(p.level === 'supermod'
@@ -30,17 +32,18 @@ function actions(p) {
 function drawUsers() {
   const q = filter.toLowerCase();
   const list = info.users.filter(p => !q || p.name.toLowerCase().includes(q));
-  const count = lvl => info.users.filter(p => p.level === lvl).length;
   $('#userCount').textContent = info.users.length;
-  $('#levelSummary').innerHTML = Object.entries(info.levels)
-    .map(([lvl, name]) => `<span class="level-badge ${LEVEL_STYLE[lvl]}">${esc(name)}: ${count(lvl)}</span>`).join('');
+  // Zählung nach angezeigter Bezeichnung (Techniker und Inhaber getrennt, gleiche Rechte)
+  const labels = [...new Set(info.users.map(label))];
+  $('#levelSummary').innerHTML = labels
+    .map(l => `<span class="level-badge ${badgeClass(info.users.find(p => label(p) === l))}">${esc(l)}: ${info.users.filter(p => label(p) === l).length}</span>`).join('');
   $('#users').innerHTML = list.length ? list.map(p => `
     <div class="list-row align-items-start" data-id="${p.id}">
       <img src="${esc(p.avatar)}" alt="" width="36" height="36" class="rounded-circle flex-none">
       <div class="flex-grow-1 min-w-0">
         <div class="d-flex flex-wrap align-items-center gap-2">
           <span class="fw-semibold">${esc(p.name)}</span>
-          <span class="level-badge ${LEVEL_STYLE[p.level]}">${esc(info.levels[p.level])}</span>
+          <span class="level-badge ${badgeClass(p)}">${esc(label(p))}</span>
           ${p.id === me?.id ? '<span class="tag">du</span>' : ''}
         </div>
         <div class="small text-secondary mb-2">${p.level === 'list' ? (p.perms.length ? p.perms.length + ' von ' + Object.keys(info.perms).length + ' Bereichen' : 'Nur ansehen') : 'alle Rechte'}${p.added_by ? ' · hinzugefügt von ' + esc(p.added_by) : ''}</div>
@@ -53,7 +56,7 @@ function drawUsers() {
 
 function drawRoleInfo() {
   $('#roleInfo').innerHTML = `
-    <li><strong>Inhaber</strong>: alles, auch Super-Mods vergeben. Nur im Code änderbar.</li>
+    <li><strong>Inhaber</strong> und <strong>Techniker</strong>: alles, auch Super-Mods vergeben.</li>
     <li><strong>Super-Mod</strong>: alles inkl. Benutzer verwalten – aber Inhaber und Super-Mods nicht ändern. Vergeben nur Inhaber.</li>
     <li><strong>Benutzerliste</strong>: nur die angehakten Bereiche.</li>
     <li>Discord-Rollen und Server-Rechte geben <strong>keinen</strong> Zugang – nur diese Liste zählt. Bots können nicht hinzugefügt werden.</li>`;

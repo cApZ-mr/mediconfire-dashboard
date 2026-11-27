@@ -474,6 +474,7 @@ button.member-item:hover { background: rgba(255, 255, 255, .05); border-color: v
 
 .level-badge { font-size: .7rem; font-weight: 700; padding: .15rem .55rem; border-radius: 999px; border: 1px solid transparent }
 .level-owner { background: rgba(255, 106, 0, .18); border-color: rgba(255, 106, 0, .5); color: #ffb27a }
+.level-tech { background: rgba(0, 200, 220, .15); border-color: rgba(0, 200, 220, .5); color: #9ff0fb }
 .level-supermod { background: rgba(145, 70, 255, .18); border-color: rgba(145, 70, 255, .5); color: #cdb3ff }
 .level-list { background: rgba(255, 255, 255, .06); border-color: var(--line-2); color: #cfcfd6 }
 .btn-check:disabled + .perm-chip { opacity: .75 }
