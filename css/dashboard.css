@@ -439,6 +439,9 @@ h1, h2, h3, h4, h5, h6 { letter-spacing: -.025em; font-weight: 800 }
 .embed.flash { animation: flash 1s var(--ease) }
 @keyframes flash { from { box-shadow: inset 0 0 0 999px rgba(255, 106, 0, .22) } }
 
+/* Nur für Admins/Moderatoren sichtbar */
+body:not(.is-admin) .admin-only { display: none !important }
+
 /* Admin: Mitglied suchen */
 .min-w-0 { min-width: 0 }
 .flex-none { flex: none }

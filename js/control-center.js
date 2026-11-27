@@ -433,13 +433,13 @@ document.addEventListener("DOMContentLoaded", () => {
 
     setText("tagStream", stream || "");
     setText("tagAnn", !ann.channel_id ? "" : ann.auto ? "Automatisch" : "Aus");
-    setText("tagWardogs", o.wardogs && o.wardogs.code ? o.wardogs.code : "");
+    setText("tagWardogs", o.wardogs && o.wardogs.code ? (o.wardogs.expired ? "abgelaufen" : o.wardogs.code) : "");
     setText("tagJoin", `${o.join_roles} aktiv`);
     setText("tagTodos", `${o.open_todos} offen`);
 
     setNode("Streamplan", stream || "Kein Plan");
     setNode("Ankündigung", !ann.channel_id ? "Standard" : ann.auto ? "Automatisch" : "Aus");
-    setNode("Wardogs Nachrichten", o.wardogs && o.wardogs.code ? `Code: ${o.wardogs.code}` : "Kein Code");
+    setNode("Wardogs Nachrichten", o.wardogs && o.wardogs.code && !o.wardogs.expired ? `Code: ${o.wardogs.code}` : "Kein Code");
     setNode("Sonstige", "Embed senden");
     setNode("Join Roles", `${o.join_roles} aktiv`);
     setNode("Select Roles", `${o.selfroles ?? 0} ${o.selfroles === 1 ? "Rolle" : "Rollen"}`);

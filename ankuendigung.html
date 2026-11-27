@@ -59,6 +59,15 @@
                         <button class="btn btn-outline-light" type="button" id="testBtn"><i class="ti ti-send" aria-hidden="true"></i> Test senden</button>
                     </div>
                 </form>
+                <div class="card p-4 mt-4">
+                    <div class="section-title mb-2">Überwachte Twitch-Kanäle</div>
+                    <p class="form-text mt-0 mb-3">Geht einer dieser Kanäle live, postet der Bot die Ankündigung. Änderungen gelten ab der nächsten Minute.</p>
+                    <div class="d-flex flex-wrap gap-2 mb-3" id="twitchUsers"></div>
+                    <form class="d-flex gap-2" id="twitchAdd" autocomplete="off">
+                        <input class="form-control" id="twitchName" placeholder="Twitch-Name, z. B. m3diconfire" maxlength="25" pattern="[A-Za-z0-9_]{3,25}" required aria-label="Twitch-Name">
+                        <button class="btn btn-outline-light flex-none" type="submit"><i class="ti ti-plus" aria-hidden="true"></i> Hinzufügen</button>
+                    </form>
+                </div>
             </div>
             <div class="col-lg-6">
                 <div class="card p-4">

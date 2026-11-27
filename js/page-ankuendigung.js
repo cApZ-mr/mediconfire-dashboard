@@ -59,3 +59,39 @@ $('#testBtn').onclick = async () => {
     toast('Testnachricht in Discord gesendet');
   } catch (err) { toastError(esc(err.message)); }
 };
+
+/* Überwachte Twitch-Kanäle */
+let twitchUsers = [];
+
+function drawTwitchUsers() {
+  $('#twitchUsers').innerHTML = twitchUsers.map(u => `
+    <span class="tag d-inline-flex align-items-center gap-1 py-1 px-2" style="font-size:.85rem">
+      <i class="ti ti-brand-twitch" style="color:#9146ff" aria-hidden="true"></i>${esc(u)}
+      <button type="button" class="btn btn-link p-0 text-secondary" data-remove="${esc(u)}" aria-label="${esc(u)} entfernen"><i class="ti ti-x" aria-hidden="true"></i></button>
+    </span>`).join('');
+}
+
+async function saveTwitchUsers(next) {
+  try {
+    twitchUsers = await apiFetch('/api/twitch-users', 'PUT', { users: next });
+    drawTwitchUsers();
+    toast('Twitch-Kanäle gespeichert');
+  } catch (err) { toastError(esc(err.message)); }
+}
+
+$('#twitchUsers').addEventListener('click', e => {
+  const b = e.target.closest('[data-remove]');
+  if (!b) return;
+  if (twitchUsers.length === 1) return toastError('Mindestens ein Kanal muss bleiben');
+  if (confirm(`${b.dataset.remove} nicht mehr überwachen?`)) saveTwitchUsers(twitchUsers.filter(u => u !== b.dataset.remove));
+});
+
+$('#twitchAdd').addEventListener('submit', e => {
+  e.preventDefault();
+  const name = $('#twitchName').value.trim().toLowerCase();
+  if (twitchUsers.includes(name)) return toastError('Kanal ist schon drin');
+  $('#twitchName').value = '';
+  saveTwitchUsers([...twitchUsers, name]);
+});
+
+apiFetch('/api/twitch-users').then(u => { twitchUsers = u; drawTwitchUsers(); }).catch(err => toastError(esc(err.message)));

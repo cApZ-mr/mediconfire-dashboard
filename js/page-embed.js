@@ -113,11 +113,21 @@ form.addEventListener('submit', async e => {
   const btn = $('#sendBtn');
   btn.disabled = true;
   try {
-    await apiFetch('/api/embed', 'POST', data());
-    toast('Embed in Discord gesendet');
+    const res = await apiFetch('/api/embed', 'POST', { ...data(), edit_link: val('e_edit') });
+    toast(res.edited ? 'Nachricht in Discord aktualisiert' : 'Embed in Discord gesendet');
+    $('#lastLink').innerHTML = `Zuletzt: <a href="${esc(res.link)}" target="_blank" rel="noopener">Nachricht öffnen</a> · <a href="#" id="useLast">diese bearbeiten</a>`;
+    $('#useLast').onclick = ev => { ev.preventDefault(); $('#e_edit').value = res.link; syncSendLabel(); };
   } catch (err) { toastError(esc(err.message)); }
   finally { btn.disabled = false; }
 });
+
+// Button-Text zeigt, ob neu gesendet oder bearbeitet wird
+function syncSendLabel() {
+  const editing = !!val('e_edit');
+  $('#sendBtn').innerHTML = `<i class="ti ti-${editing ? 'refresh' : 'send'}" aria-hidden="true"></i> ${editing ? 'Nachricht aktualisieren' : 'In Discord senden'}`;
+  $('#e_channel').disabled = editing; // beim Bearbeiten bleibt die Nachricht in ihrem Kanal
+}
+$('#e_edit').addEventListener('input', syncSendLabel);
 
 (async () => {
   const draft = JSON.parse(localStorage.getItem(DRAFT_KEY) || '{}');

@@ -20,10 +20,12 @@ function drawCurrent() {
     box.innerHTML = 'Noch kein Code hinterlegt.';
     return;
   }
-  const stale = Date.now() - new Date(current.updated_at) > STALE_AFTER_MS;
+  const age = Date.now() - new Date(current.updated_at);
+  const stale = age > STALE_AFTER_MS;
+  const expired = current.expire_hours && age >= current.expire_hours * 3600 * 1000;
   box.innerHTML = `
-    <div class="fs-3 fw-bold text-body mb-1" style="font-family:monospace">${esc(current.code)}</div>
-    <div class="${stale ? 'text-warning' : ''}">${stale ? '⚠️ ' : ''}Gesetzt ${ago(current.updated_at)}${current.updated_by ? ' von ' + esc(current.updated_by.username) : ''}</div>
+    <div class="fs-3 fw-bold text-body mb-1" style="font-family:monospace${expired ? ';text-decoration:line-through;opacity:.5' : ''}">${esc(current.code)}</div>
+    <div class="${expired ? 'text-danger' : stale ? 'text-warning' : ''}">${expired ? 'Abgelaufen – !wardogs zeigt ihn nicht mehr. ' : stale ? '⚠️ ' : ''}Gesetzt ${ago(current.updated_at)}${current.updated_by ? ' von ' + esc(current.updated_by.username) : ''}</div>
     <button class="btn btn-outline-light btn-sm mt-3" id="clearBtn">Code löschen</button>`;
   $('#clearBtn').onclick = clearCode;
 }
@@ -63,5 +65,13 @@ $('#codeForm').addEventListener('submit', async e => {
   }
 });
 
-load();
+$('#expire').addEventListener('change', async e => {
+  try {
+    current = await apiFetch(API + '/expire', 'PUT', { hours: +e.target.value });
+    drawCurrent();
+    toast(+e.target.value ? `Code läuft jetzt nach ${e.target.selectedOptions[0].text} ab` : 'Code läuft nicht mehr automatisch ab');
+  } catch (err) { toastError(esc(err.message)); }
+});
+
+load().then(() => { $('#expire').value = String(current?.expire_hours || 0); });
 setInterval(drawCurrent, 30000); // "vor X Minuten" aktuell halten

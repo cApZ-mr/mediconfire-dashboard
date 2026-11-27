@@ -5,6 +5,7 @@ let panels = {};      // { games: { title, description, roles: [{ role_id, label
 let guildRoles = [];  // [{ id, name, color }]
 let emojis = [];      // [{ id, name, animated }]
 let channelOptions = '';
+let sentCount = {};   // { games: 2 } – übers Dashboard gesendete Panels
 
 const rolesText = n => `${n} ${n === 1 ? 'Rolle' : 'Rollen'}`;
 const emojiUrl = id => `https://cdn.discordapp.com/emojis/${id}.webp?size=48`;
@@ -57,6 +58,7 @@ function panelCard(key) {
         <button class="btn btn-outline-light btn-sm mt-2 align-self-start" type="button" data-add><i class="ti ti-plus" aria-hidden="true"></i> Rolle</button>
         <div class="d-flex flex-wrap gap-2 align-items-center mt-4 pt-3" style="border-top:1px solid var(--line)">
           <button class="btn btn-primary" type="submit">Speichern</button>
+          <button class="btn btn-outline-light btn-sm" type="button" data-refresh ${sentCount[key] ? '' : 'disabled'} title="Überschrift und Text in allen übers Dashboard gesendeten Panels aktualisieren"><i class="ti ti-refresh" aria-hidden="true"></i> Gesendete aktualisieren (${sentCount[key] || 0})</button>
           <div class="input-group input-group-sm ms-auto" style="max-width:300px">
             <select class="form-select" data-channel aria-label="Kanal für das Panel">${channelOptions}</select>
             <button class="btn btn-outline-light" type="button" data-send title="Panel mit Button in diesen Kanal senden"><i class="ti ti-send" aria-hidden="true"></i> Panel senden</button>
@@ -64,6 +66,12 @@ function panelCard(key) {
         </div>
       </form>
     </div>`;
+}
+
+function redrawRefresh(key) {
+  const b = $(`[data-panel="${key}"] [data-refresh]`);
+  b.disabled = !sentCount[key];
+  b.lastChild.textContent = ` Gesendete aktualisieren (${sentCount[key] || 0})`;
 }
 
 function draw() {
@@ -117,6 +125,17 @@ $('#panels').addEventListener('click', async e => {
     try {
       await apiFetch(`/api/selfroles/${key}/send`, 'POST', { channel_id: $('[data-channel]', form).value });
       toast('Panel in Discord gesendet');
+      sentCount[key] = (sentCount[key] || 0) + 1;
+      redrawRefresh(key);
+    } catch (err) { toastError(esc(err.message)); }
+  } else if (e.target.closest('[data-refresh]')) {
+    try {
+      // erst speichern, damit die Panels den aktuellen Text bekommen
+      panels[key] = await apiFetch(`/api/selfroles/${key}`, 'PUT', panels[key]);
+      const res = await apiFetch(`/api/selfroles/${key}/refresh`, 'POST');
+      sentCount[key] = res.updated;
+      redrawRefresh(key);
+      toast(`${res.updated} Panel${res.updated === 1 ? '' : 's'} aktualisiert`);
     } catch (err) { toastError(esc(err.message)); }
   }
 });
@@ -132,9 +151,11 @@ $('#panels').addEventListener('submit', async e => {
 
 (async () => {
   try {
-    const [saved, roles, emo, channels] = await Promise.all([
+    const [saved, roles, emo, channels, sent] = await Promise.all([
       apiFetch('/api/selfroles'), apiFetch('/api/roles'), apiFetch('/api/emojis'), apiFetch('/api/channels'),
+      apiFetch('/api/selfroles/sent'),
     ]);
+    sentCount = sent;
     panels = saved;
     guildRoles = roles;
     emojis = emo;

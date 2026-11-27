@@ -98,3 +98,39 @@ form.addEventListener('submit', async e => {
   } catch (err) { toastError(esc(err.message)); }
   finally { btn.disabled = false; }
 });
+
+/* Pings & Erinnerung (eigene Speicherung, unabhängig vom Senden) */
+let pingIds = [];
+
+function drawPings(roles) {
+  $('#pingRoles').innerHTML = roles.map(r => `
+    <input type="checkbox" class="btn-check" id="pr${r.id}" value="${r.id}" ${pingIds.includes(r.id) ? 'checked' : ''} autocomplete="off">
+    <label class="btn btn-outline-light btn-sm" for="pr${r.id}"><span class="dot me-1 d-inline-block" style="background:${r.color};width:8px;height:8px"></span>@${esc(r.name)}</label>`).join('');
+  const names = Object.fromEntries(roles.map(r => [r.id, r.name]));
+  const paint = () => {
+    pingIds = $$('#pingRoles .btn-check:checked').map(c => c.value);
+    $('#pv_ping').innerHTML = pingIds.map(id => `<span class="ping">@${esc(names[id] || 'Rolle')}</span>`).join(' ');
+  };
+  $('#pingRoles').addEventListener('change', paint);
+  paint();
+}
+
+$('#saveSettings').onclick = async () => {
+  try {
+    await apiFetch('/api/streamplan/settings', 'PUT', {
+      ping_roles: pingIds,
+      reminder: { enabled: $('#remOn').checked, minutes: +$('#remMin').value },
+    });
+    toast('Pings & Erinnerung gespeichert');
+  } catch (err) { toastError(esc(err.message)); }
+};
+
+(async () => {
+  try {
+    const [saved, roles] = await Promise.all([apiFetch('/api/streamplan'), apiFetch('/api/roles')]);
+    pingIds = saved.ping_roles || [];
+    $('#remOn').checked = !!saved.reminder?.enabled;
+    if (saved.reminder?.minutes) $('#remMin').value = saved.reminder.minutes;
+    drawPings(roles);
+  } catch (err) { toastError(esc(err.message)); }
+})();

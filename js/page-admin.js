@@ -82,12 +82,12 @@ const ACTIONS = {
     $('#actForm').addEventListener('submit', async e => {
       e.preventDefault();
       const minutes = +$('#duration').value, label = $('#duration').selectedOptions[0].text;
-      const m = await act('/api/admin/timeout', { user_id: target.id, minutes, reason: reason() },
+      const m = await act('/api/admin/timeout', { user_id: target.id, name: target.display, minutes, reason: reason() },
         `${target.display} für ${label} stummschalten?`, `${target.display} ist für ${label} im Timeout`);
       if (m) choose(m);
     });
     $('#untimeoutBtn').onclick = async () => {
-      const m = await act('/api/admin/timeout', { user_id: target.id, minutes: 0, reason: reason() || 'Timeout aufgehoben' },
+      const m = await act('/api/admin/timeout', { user_id: target.id, name: target.display, minutes: 0, reason: reason() || 'Timeout aufgehoben' },
         `Timeout von ${target.display} aufheben?`, 'Timeout aufgehoben');
       if (m) choose(m);
     };
@@ -96,7 +96,7 @@ const ACTIONS = {
   kick() {
     $('#actForm').addEventListener('submit', async e => {
       e.preventDefault();
-      const ok = await act('/api/admin/kick', { user_id: target.id, reason: reason() },
+      const ok = await act('/api/admin/kick', { user_id: target.id, name: target.display, reason: reason() },
         `${target.display} wirklich vom Server kicken?`, `${target.display} wurde gekickt`);
       if (ok) { choose(null); $('#reason').value = ''; }
     });
@@ -118,7 +118,7 @@ const ACTIONS = {
 
     $('#actForm').addEventListener('submit', async e => {
       e.preventDefault();
-      const ok = await act('/api/admin/ban', { user_id: target.id, reason: reason(), delete_days: +$('#delDays').value },
+      const ok = await act('/api/admin/ban', { user_id: target.id, name: target.display, reason: reason(), delete_days: +$('#delDays').value },
         `${target.display} wirklich bannen?`, `${target.display} wurde gebannt`);
       if (ok) { choose(null); $('#reason').value = ''; loadBans(); }
     });

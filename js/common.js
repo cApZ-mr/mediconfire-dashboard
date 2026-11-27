@@ -20,6 +20,7 @@ const NAV = [
         ['select-roles.html', 'Select Roles', 'hand-click'],
     ]},
     { href: 'todos.html', label: 'Todos', icon: 'checklist' },
+    { href: 'verlauf.html', label: 'Verlauf', icon: 'history' },
     { label: 'Admin', icon: 'shield', danger: true, items: [
         ['admin-timeout.html', 'Timeout', 'clock-pause'],
         ['admin-kick.html', 'Kick', 'door-exit'],
@@ -30,8 +31,8 @@ const NAV = [
 
 const icon = name => `<i class="ti ti-${name}" aria-hidden="true"></i>`;
 
-function navRender(cur) {
-    return NAV.map(entry => {
+function navRender(cur, user) {
+    return NAV.filter(e => !e.danger || user.admin).map(entry => {
         if (!entry.items) {
             return `<li class="nav-item"><a class="nav-link ${entry.href === cur ? 'active' : ''}" href="${entry.href}">${icon(entry.icon)}${entry.label}</a></li>`;
         }
@@ -80,7 +81,7 @@ function renderHeader(user) {
           <div class="collapse navbar-collapse" id="nav">
             <ul class="navbar-nav nav-pills-bar mx-lg-auto gap-1 my-3 my-lg-0">
               <li class="nav-ind" aria-hidden="true"></li>
-              ${navRender(cur)}
+              ${navRender(cur, user)}
             </ul>
 
             <div class="d-flex align-items-center gap-2" id="userBox">
@@ -206,6 +207,8 @@ document.addEventListener('pointerdown', e => {
 fetch('/auth/me', { credentials: 'include' })
     .then(r => r.ok ? r.json() : Promise.reject())
     .then(data => {
+        document.body.classList.toggle('is-admin', !!data.user.admin);
+        if (!data.user.admin && /admin-/.test(location.pathname)) { location.href = 'index.html'; return; } // Server prüft zusätzlich
         renderHeader(data.user);
         const h = new Date().getHours(), g = $('#greeting');
         if (g) g.textContent = `${h < 11 ? 'Guten Morgen' : h < 18 ? 'Hallo' : 'Guten Abend'}, ${data.user.username}`;
