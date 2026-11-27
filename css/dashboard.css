@@ -374,6 +374,10 @@ h1, h2, h3, h4, h5, h6 { letter-spacing: -.025em; font-weight: 800 }
 .day:hover { background: rgba(255, 255, 255, .025) }
 .day.on { background: rgba(255, 106, 0, .05) }
 
+.mode-group .btn { padding: .3rem .65rem; font-weight: 600; white-space: nowrap }
+.mode-group .btn-check:checked + .btn { background: var(--accent); border-color: var(--accent); color: #160800 }
+.mode-group .btn-check[value=off]:checked + .btn { background: rgba(255, 255, 255, .1); border-color: var(--line-2); color: #fff }
+
 .list-row {
     display: flex;
     align-items: center;

@@ -1,35 +1,45 @@
 /* Logik für streamplan.html */
 const DAYS = ['Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag', 'Samstag', 'Sonntag'];
+const MODES = [['off', 'Pause'], ['spontan', 'Spontan'], ['plan', 'Geplant']];
+const NO_TITLE = 'Spontan'; // steht da, wenn bei "Geplant" kein Titel eingetragen ist
 
 $('#days').innerHTML = DAYS.map((d, i) => `
   <div class="day row g-2 align-items-center py-3 border-bottom">
-    <div class="col-12 col-md-3">
-        <div class="form-check form-switch">
-            <input class="form-check-input" type="checkbox" name="on${i}" id="on${i}">
-            <label class="form-check-label fw-semibold" for="on${i}">${d}</label>
+    <div class="col-12 d-flex align-items-center gap-2">
+        <span class="fw-semibold flex-none" style="width:5.8rem">${d}</span>
+        <div class="btn-group btn-group-sm mode-group" role="group" aria-label="${d}">
+          ${MODES.map(([v, label]) => `
+            <input type="radio" class="btn-check" name="mode${i}" id="m${v}${i}" value="${v}" ${v === 'off' ? 'checked' : ''}>
+            <label class="btn btn-outline-light" for="m${v}${i}">${label}</label>`).join('')}
         </div>
     </div>
-    <div class="col-5 col-md-3">
+    <div class="col-4 col-md-3">
         <input type="time" class="form-control" name="time${i}" aria-label="Uhrzeit ${d}">
     </div>
-    <div class="col-7 col-md-6">
+    <div class="col-8 col-md-9">
         <input class="form-control" name="title${i}" placeholder="Titel oder Spiel" aria-label="Titel ${d}">
     </div>
   </div>`).join('');
 
+const modeOf = r => $('input[type=radio]:checked', r).value;
+
 function planLines() {
   return $$('.day').map((r, i) => {
-    const on = $('input[type=checkbox]', r).checked, [t, ti] = $$('input.form-control', r).map(x => x.value);
-    return on ? `${DAYS[i]}: ${t ? t + ' Uhr – ' : ''}${ti || 'Stream'}` : `${DAYS[i]}: Pause`;
+    const mode = modeOf(r), [t, ti] = $$('input.form-control', r).map(x => x.value.trim());
+    if (mode === 'spontan') return `${DAYS[i]}: Spontan${ti ? ' – ' + ti : ''}`;
+    if (mode === 'plan') return `${DAYS[i]}: ${t ? t + ' Uhr – ' : ''}${ti || NO_TITLE}`;
+    return `${DAYS[i]}: Pause`;
   }).join('\n');
 }
 
 function updateStreamplan() {
   $$('.day').forEach(r => {
-    const on = $('input[type=checkbox]', r).checked;
-    r.classList.toggle('on', on);
-    $$('input.form-control', r).forEach(i => i.disabled = !on);
-    $('input[type=time]', r).required = on; // Browser meldet halb ausgefüllte Uhrzeit (--:30) statt leer zu senden
+    const mode = modeOf(r), time = $('input[type=time]', r), title = $('input[name^=title]', r);
+    r.classList.toggle('on', mode !== 'off');
+    time.disabled = mode !== 'plan';      // bei "Spontan" gibt es keine feste Uhrzeit
+    time.required = mode === 'plan';      // Browser meldet halb ausgefüllte Uhrzeit (--:30) statt leer zu senden
+    title.disabled = mode === 'off';
+    title.placeholder = mode === 'plan' ? `Titel oder Spiel (leer = ${NO_TITLE})` : 'Titel oder Spiel (optional)';
   });
   $('#pv_title').textContent = $('#ptitle').value;
   $('#pv_lines').textContent = planLines();
@@ -47,12 +57,15 @@ updateStreamplan();
 /* Anbindung an den Bot: Vorschau wird genau so als Embed gepostet */
 function restore(saved) {
   if (saved.form) {
-    $$('input[type=checkbox]', form).forEach(c => { c.checked = false; }); // FormData enthält nur angehakte
+    $('#replace').checked = false; // FormData enthält nur angehakte Checkboxen
+    $$('input[type=radio][value=off]', form).forEach(c => { c.checked = true; });
     Object.entries(saved.form).forEach(([k, v]) => {
+      const old = k.match(/^on(\d)$/); // älteres Format: Schalter an = geplant
+      if (old) { k = 'mode' + old[1]; v = 'plan'; }
       const el = form.elements[k];
       if (!el) return;
       if (el.type === 'checkbox') el.checked = true;
-      else el.value = v;
+      else el.value = v; // klappt auch für Radio-Gruppen
     });
   }
   if (saved.updated_at) {

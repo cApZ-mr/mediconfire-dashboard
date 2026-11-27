@@ -391,10 +391,11 @@ document.addEventListener("DOMContentLoaded", () => {
     const hhmm = now.toTimeString().slice(0, 5);
     for (let k = 0; k < 8; k++) {
       const d = (today + k) % 7;
+      const mode = form[`mode${d}`] || (form[`on${d}`] ? "plan" : "off"); // on${d} = älteres Format
       const time = form[`time${d}`] || "";
-      if (form[`on${d}`] && (k > 0 || time >= hhmm)) {
-        return `${k === 0 ? "Heute" : WEEKDAYS[d]}${time ? ", " + time : ""}`;
-      }
+      const day = k === 0 ? "Heute" : WEEKDAYS[d];
+      if (mode === "spontan") return `${day}, spontan`;
+      if (mode === "plan" && (k > 0 || time >= hhmm)) return `${day}${time ? ", " + time : ""}`;
     }
     return null;
   }
