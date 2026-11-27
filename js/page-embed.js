@@ -27,8 +27,8 @@ function data() {
     description: $('#e_desc').value,
     color: $('#e_color').value,
     footer: val('e_footer'),
-    thumbnail: val('e_thumb'),
-    image: val('e_image'),
+    thumbnail: $('#e_thumb').checked,
+    image: $('#e_image').checked,
     timestamp: $('#e_ts').checked,
     fields: fields.filter(f => f.name.trim() && f.value.trim()),
   };
@@ -51,7 +51,8 @@ function render() {
   const ping = $('#e_ping').selectedOptions[0];
   $('#pv_content').innerHTML = (ping && ping.value ? `<span class="ping">${esc(ping.text)}</span> ` : '') + md(d.content);
 
-  const [url, thumb, image] = [d.url, d.thumbnail, d.image].map(safeUrl);
+  const url = safeUrl(d.url);
+  const LOGO = 'img/MedicOnFire_Logo.png'; // im echten Post: Profilbild des Bots
   const title = d.title ? (url ? `<a class="live-title" href="${esc(url)}" target="_blank" rel="noopener">${esc(d.title)}</a>` : `<div class="text-white fw-bold">${esc(d.title)}</div>`) : '';
   const footer = [d.footer && esc(d.footer), d.timestamp && 'heute um ' + new Date().toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })].filter(Boolean).join(' • ');
   const empty = !(d.title || d.description || d.fields.length || d.image);
@@ -64,11 +65,11 @@ function render() {
         ${title}
         ${d.description ? `<div class="mt-1" style="white-space:pre-line">${md(d.description)}</div>` : ''}
       </div>
-      ${thumb ? `<img class="live-thumb" src="${esc(thumb)}" alt="">` : ''}
+      ${d.thumbnail ? `<img class="live-thumb" src="${LOGO}" alt="">` : ''}
     </div>
     ${d.fields.length ? `<div class="row g-2 mt-1">${d.fields.map(f => `
       <div class="${f.inline ? 'col-4' : 'col-12'}"><div class="text-white fw-bold small">${esc(f.name)}</div><div class="small" style="white-space:pre-line">${md(f.value)}</div></div>`).join('')}</div>` : ''}
-    ${image ? `<img class="w-100 rounded mt-2" src="${esc(image)}" alt="">` : ''}
+    ${d.image ? `<img class="w-100 rounded mt-2" src="${LOGO}" alt="">` : ''}
     ${footer ? `<div class="small mt-2">${footer}</div>` : ''}`;
 
   $('#descCount').textContent = $('#e_desc').value.length;
@@ -120,7 +121,7 @@ form.addEventListener('submit', async e => {
 
 (async () => {
   const draft = JSON.parse(localStorage.getItem(DRAFT_KEY) || '{}');
-  const map = { ping: 'e_ping', content: 'e_content', author: 'e_author', title: 'e_title', url: 'e_url', description: 'e_desc', color: 'e_color', footer: 'e_footer', thumbnail: 'e_thumb', image: 'e_image' };
+  const map = { ping: 'e_ping', content: 'e_content', author: 'e_author', title: 'e_title', url: 'e_url', description: 'e_desc', color: 'e_color', footer: 'e_footer' };
   try {
     const roles = await apiFetch('/api/roles');
     $('#e_ping').insertAdjacentHTML('beforeend', roles.map(r => `<option value="${r.id}">@${esc(r.name)}</option>`).join(''));
@@ -128,6 +129,8 @@ form.addEventListener('submit', async e => {
   } catch (err) { toastError(esc(err.message)); }
   Object.entries(map).forEach(([k, id]) => { if (draft[k] != null) $('#' + id).value = draft[k]; });
   $('#e_ts').checked = !!draft.timestamp;
+  $('#e_thumb').checked = draft.thumbnail === true; // alte Entwürfe hatten hier Links
+  $('#e_image').checked = draft.image === true;
   fields = Array.isArray(draft.fields) ? draft.fields : [];
   drawFields();
   render();

@@ -71,15 +71,15 @@
                                 <label class="form-label" for="e_footer">Fußzeile</label>
                                 <input class="form-control" id="e_footer" name="footer" maxlength="2048">
                             </div>
-                            <div class="col-md-6">
-                                <label class="form-label" for="e_thumb">Kleines Bild rechts (URL)</label>
-                                <input class="form-control" id="e_thumb" name="thumbnail" type="url" maxlength="500" placeholder="https://…">
-                            </div>
-                            <div class="col-md-6">
-                                <label class="form-label" for="e_image">Großes Bild unten (URL)</label>
-                                <input class="form-control" id="e_image" name="image" type="url" maxlength="500" placeholder="https://…">
-                            </div>
-                            <div class="col-12">
+                            <div class="col-12 d-flex flex-column gap-2">
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" id="e_thumb" name="thumbnail">
+                                    <label class="form-check-label" for="e_thumb">Logo klein rechts</label>
+                                </div>
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" id="e_image" name="image">
+                                    <label class="form-check-label" for="e_image">Logo groß unten</label>
+                                </div>
                                 <div class="form-check form-switch">
                                     <input class="form-check-input" type="checkbox" id="e_ts" name="timestamp">
                                     <label class="form-check-label" for="e_ts">Zeitstempel in der Fußzeile</label>
