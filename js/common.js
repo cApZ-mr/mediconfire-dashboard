@@ -85,13 +85,14 @@ function renderHeader(user) {
             </ul>
 
             <div class="d-flex align-items-center gap-2" id="userBox">
-                <div class="avatar">
+                <div class="avatar" title="${esc(user.username)}">
                     ${user.avatar
                         ? `<img src="https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png?size=64" alt="Profilbild">`
                         : esc(user.username[0].toUpperCase())}
                 </div>
-                <span class="fw-semibold">${esc(user.username)}</span>
-                <button class="btn btn-outline-light btn-sm ms-1" id="logoutBtn" title="Abmelden" aria-label="Abmelden">${icon('logout')}</button>
+                <span class="fw-semibold d-none d-xxl-inline">${esc(user.username)}</span>
+                ${(user.perms || []).includes('users') ? `<a class="btn btn-outline-light btn-sm ms-1 ${cur === 'benutzer.html' ? 'active' : ''}" href="benutzer.html" title="Benutzer & Rechte" aria-label="Benutzer und Rechte">${icon('users-group')}</a>` : ''}
+                <button class="btn btn-outline-light btn-sm" id="logoutBtn" title="Abmelden" aria-label="Abmelden">${icon('logout')}</button>
             </div>
           </div>
         </div>
@@ -208,7 +209,9 @@ fetch('/auth/me', { credentials: 'include' })
     .then(r => r.ok ? r.json() : Promise.reject())
     .then(data => {
         document.body.classList.toggle('is-admin', !!data.user.admin);
-        if (!data.user.admin && /admin-/.test(location.pathname)) { location.href = 'index.html'; return; } // Server prüft zusätzlich
+        const perms = data.user.perms || [];
+        const needs = /admin-/.test(location.pathname) ? 'moderation' : /benutzer/.test(location.pathname) ? 'users' : null;
+        if (needs && !perms.includes(needs)) { location.href = 'index.html'; return; } // Server prüft zusätzlich
         renderHeader(data.user);
         const h = new Date().getHours(), g = $('#greeting');
         if (g) g.textContent = `${h < 11 ? 'Guten Morgen' : h < 18 ? 'Hallo' : 'Guten Abend'}, ${data.user.username}`;
