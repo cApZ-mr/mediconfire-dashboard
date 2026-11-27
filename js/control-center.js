@@ -441,7 +441,7 @@ document.addEventListener("DOMContentLoaded", () => {
     setNode("Wardogs Nachrichten", o.wardogs && o.wardogs.code ? `Code: ${o.wardogs.code}` : "Kein Code");
     setNode("Sonstige", "Embed senden");
     setNode("Join Roles", `${o.join_roles} aktiv`);
-    setNode("Select Roles", "Bald");
+    setNode("Select Roles", `${o.selfroles ?? 0} ${o.selfroles === 1 ? "Rolle" : "Rollen"}`);
     setNode("Todos", `${o.open_todos} offen`);
   }
 
